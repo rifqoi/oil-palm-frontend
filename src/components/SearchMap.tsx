@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, ReactEventHandler } from "react"
+import React, { ChangeEvent, FC, ReactEventHandler, ReactNode } from "react"
 
 const SearchMap: FC<{
 	onSubmit: ReactEventHandler<HTMLFormElement>
