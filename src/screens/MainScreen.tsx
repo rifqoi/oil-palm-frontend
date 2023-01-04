@@ -1,4 +1,4 @@
-import { SyntheticEvent, useState, useRef } from "react"
+import React, { SyntheticEvent, useState, useRef } from "react"
 import LeafletMap from "../components/Map"
 import Navbar from "../components/Navbar"
 import SearchMap from "../components/SearchMap"
@@ -9,6 +9,7 @@ import { Prediction } from "../types/ApiCall"
 import type P5 from "p5"
 import BoundingBox from "../components/BoundingBox"
 import Sketch from "react-p5"
+import BBox from "../components/BBox"
 
 type ImageSize = {
 	width: number | undefined
@@ -25,7 +26,7 @@ const getAddressData = async (
 }
 
 const getImage = async (lat: number, long: number) => {
-	const url = "http://localhost:8000/api/v1/inference/image"
+	const url = "http://34.143.243.105:7546/api/v1/inference/image"
 	const response = await fetch(url, {
 		method: "POST",
 		body: JSON.stringify({
@@ -34,7 +35,7 @@ const getImage = async (lat: number, long: number) => {
 		}),
 		headers: new Headers({
 			Authorization:
-				"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiYWNjZXNzX3Rva2VuIiwiZXhwIjoxNjcyODI5OTI2LCJpYXQiOjE2NzIyMjUxMjYsInN1YiI6InJpZnFvaXgifQ.IF9Tq3eXS74dM6qHqhlIgJeNai1fThbxeoRPbS1vYD8",
+				"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiYWNjZXNzX3Rva2VuIiwiZXhwIjoxNjczNDQ4NTkwLCJpYXQiOjE2NzI4NDM3OTAsInN1YiI6InJpZnFpIn0.NsPE7zgtENDI3RQILCtnHDQLjfPenEH2zP7ydXWPonc",
 			"Content-Type": "application/json",
 		}),
 	})
@@ -44,7 +45,7 @@ const getImage = async (lat: number, long: number) => {
 	return imageObjectURL
 }
 const predictImage = async (lat: number, long: number) => {
-	const url = "http://localhost:8000/api/v1/inference/predict"
+	const url = "http://34.143.243.105:7546/api/v1/inference/predict"
 	const response = await fetch(url, {
 		method: "POST",
 		body: JSON.stringify({
@@ -53,7 +54,7 @@ const predictImage = async (lat: number, long: number) => {
 		}),
 		headers: new Headers({
 			Authorization:
-				"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiYWNjZXNzX3Rva2VuIiwiZXhwIjoxNjcyODI5OTI2LCJpYXQiOjE2NzIyMjUxMjYsInN1YiI6InJpZnFvaXgifQ.IF9Tq3eXS74dM6qHqhlIgJeNai1fThbxeoRPbS1vYD8",
+				"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiYWNjZXNzX3Rva2VuIiwiZXhwIjoxNjczNDQ4NTkwLCJpYXQiOjE2NzI4NDM3OTAsInN1YiI6InJpZnFpIn0.NsPE7zgtENDI3RQILCtnHDQLjfPenEH2zP7ydXWPonc",
 			"Content-Type": "application/json",
 		}),
 	})
@@ -73,46 +74,6 @@ const MainScreen = () => {
 	const [locationFound, setLocationFound] = useState<boolean | null>(null)
 	const [imageSize, setImageSize] = useState<ImageSize | null>(null)
 
-	const setup = (p5: P5, canvasParentRef: Element) => {
-		const width = imageSize?.width as number
-		const height = imageSize?.height as number
-		console.log(width, height)
-		console.log(prediction?.coco_bbox)
-		p5.createCanvas(width, height).parent(canvasParentRef)
-	}
-
-	const drawResult = (object: P5) => {
-		drawBoundingBox(object)
-		// drawLabel(object)
-	}
-
-	// draw bounding box around the detected object
-	const drawBoundingBox = (p5: P5) => {
-		// Sets the color used to draw lines.
-		p5.stroke("red")
-		// width of the stroke
-		p5.strokeWeight(2)
-		// Disables filling geometry
-		p5.noFill()
-		// draw an rectangle
-		// x and y are the coordinates of upper-left corner, followed by width and height
-		for (let i = 0; i < prediction!.coco_bbox.length; i++) {
-			if (i == 10) {
-				break
-			}
-			p5.rect(
-				prediction!.coco_bbox[i][0],
-				prediction!.coco_bbox[i][1],
-				prediction!.coco_bbox[i][2],
-				prediction!.coco_bbox[i][3]
-			)
-		}
-		// prediction!.coco_bbox.map((data, i) => {
-		// 	// x, y, w, h
-		// 	p5.rect(data[0], data[1], data[2], data[3])
-		// })
-	}
-
 	const onPredict = async (e: SyntheticEvent) => {
 		e.preventDefault()
 		if (latLong !== null || latLong !== undefined) {
@@ -124,8 +85,11 @@ const MainScreen = () => {
 		predictImage(lat, long).then((data) => {
 			setPrediction(data)
 
-			const width = imgRef.current?.clientWidth as number
-			const height = imgRef.current?.clientHeight as number
+			// const width = imgRef.current?.clientWidth as number
+			// const height = imgRef.current?.clientHeight as number
+			const width = 640
+			const height = 640
+			console.log(data)
 			setImageSize({ width: width, height: height })
 		})
 
@@ -193,20 +157,23 @@ const MainScreen = () => {
 							{JSON.stringify(buttonLatLong)}
 						</h1>
 					) : null}
-					<div className="container bg-red-100 flex w-[640px] py-4">
-						<div className="container relative inline-block">
+					<div className="container relative bg-red-100 w-[640px]">
+						<div className="container absolute top-0 left-0 inline-block">
 							{predictedImage ? (
-								<img ref={imgRef} src={predictedImage} className="w-full" />
-							) : null}
-							{prediction ? (
-								<Sketch
-									className="absolute top-0 left-0"
-									setup={setup}
-									draw={drawResult}
+								<img
+									ref={imgRef}
+									src={predictedImage}
+									className="absolute top-0 left-0 w-full"
 								/>
 							) : null}
-							{/* <div className="absolute border-brightRedLight border-2 top-10 left-0 w-10 h-5"></div> */}
-							{/* <div className="absolute border-brightRedLight border-2 top-10 left-20 w-10 h-5"></div> */}
+							{/* <img ref={imgRef} src={predictedImage} className="w-full" /> */}
+							{prediction ? (
+								<BoundingBox
+									img_width={imageSize?.width}
+									img_height={imageSize?.height}
+									prediction_data={prediction}
+								/>
+							) : null}
 						</div>
 					</div>
 				</div>

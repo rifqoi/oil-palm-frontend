@@ -1,3 +1,4 @@
+import React from "react"
 import { useForm } from "react-hook-form"
 import Navbar from "../components/Navbar"
 
@@ -54,7 +55,7 @@ const LoginScreen = () => {
 										message: "Email is required",
 									},
 									pattern: {
-										value: /^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,63})$/,
+										value: /^([a-z0-9_.-]+)@([\da-z.-]+)\.([a-z.]{2,63})$/,
 										message: "Email is invalid",
 									},
 								})}

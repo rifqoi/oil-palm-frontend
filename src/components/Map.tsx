@@ -1,5 +1,5 @@
+import React, { FC, ReactNode, useRef, RefObject } from "react"
 import { MapOptions, LayerEvent } from "leaflet"
-import { FC, ReactNode, useRef, RefObject } from "react"
 import { FeatureGroup, MapContainer, TileLayer } from "react-leaflet"
 import L from "leaflet"
 import { EditControl } from "react-leaflet-draw"
@@ -51,7 +51,7 @@ const LeafletMap: FC<
 	return (
 		<>
 			<MapContainer
-				className="h-[30rem] w-3/4 md:h-[30rem] md:w-6/12 "
+				className="h-[30rem] w-3/4 md:h-[30rem] md:w-3/4"
 				maxZoom={20}
 				ref={mapRef}
 				attributionControl={false}
@@ -77,7 +77,7 @@ const LeafletMap: FC<
 				</FeatureGroup>
 				)
 				<TileLayer
-					attribution="Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
+					// attribution="Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
 					// url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
 					// url="https://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}&s=Ga"
 					url="https://www.google.cn/maps/vt?lyrs=s@189&gl=cn&x={x}&y={y}&z={z}"
