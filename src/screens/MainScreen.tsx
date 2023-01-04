@@ -26,7 +26,7 @@ const getAddressData = async (
 }
 
 const getImage = async (lat: number, long: number) => {
-	const url = "http://34.143.243.105:7546/api/v1/inference/image"
+	const url = "http://34.87.112.231:7546/api/v1/inference/image"
 	const response = await fetch(url, {
 		method: "POST",
 		body: JSON.stringify({
@@ -35,7 +35,7 @@ const getImage = async (lat: number, long: number) => {
 		}),
 		headers: new Headers({
 			Authorization:
-				"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiYWNjZXNzX3Rva2VuIiwiZXhwIjoxNjczNDQ4NTkwLCJpYXQiOjE2NzI4NDM3OTAsInN1YiI6InJpZnFpIn0.NsPE7zgtENDI3RQILCtnHDQLjfPenEH2zP7ydXWPonc",
+				"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiYWNjZXNzX3Rva2VuIiwiZXhwIjoxNjczNDUwMTc4LCJpYXQiOjE2NzI4NDUzNzgsInN1YiI6InJpZnFpIn0.NSki-Tcl21lhB3ZHivOMcEU4nbEluRuJAytk8dxT8wQ",
 			"Content-Type": "application/json",
 		}),
 	})
@@ -45,7 +45,7 @@ const getImage = async (lat: number, long: number) => {
 	return imageObjectURL
 }
 const predictImage = async (lat: number, long: number) => {
-	const url = "http://34.143.243.105:7546/api/v1/inference/predict"
+	const url = "http://34.87.112.231:7546/api/v1/inference/predict"
 	const response = await fetch(url, {
 		method: "POST",
 		body: JSON.stringify({
@@ -54,7 +54,7 @@ const predictImage = async (lat: number, long: number) => {
 		}),
 		headers: new Headers({
 			Authorization:
-				"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiYWNjZXNzX3Rva2VuIiwiZXhwIjoxNjczNDQ4NTkwLCJpYXQiOjE2NzI4NDM3OTAsInN1YiI6InJpZnFpIn0.NsPE7zgtENDI3RQILCtnHDQLjfPenEH2zP7ydXWPonc",
+				"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiYWNjZXNzX3Rva2VuIiwiZXhwIjoxNjczNDUwMTc4LCJpYXQiOjE2NzI4NDUzNzgsInN1YiI6InJpZnFpIn0.NSki-Tcl21lhB3ZHivOMcEU4nbEluRuJAytk8dxT8wQ",
 			"Content-Type": "application/json",
 		}),
 	})
@@ -90,6 +90,7 @@ const MainScreen = () => {
 			const width = 640
 			const height = 640
 			console.log(data)
+			console.log(prediction)
 			setImageSize({ width: width, height: height })
 		})
 
@@ -174,6 +175,7 @@ const MainScreen = () => {
 									prediction_data={prediction}
 								/>
 							) : null}
+							{prediction ? <div>Count: {prediction.count}</div> : null}
 						</div>
 					</div>
 				</div>
