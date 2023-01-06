@@ -18,12 +18,12 @@ const LeafletMap: FC<
 	const fgRef = useRef<L.FeatureGroup>(null)
 
 	const onCreated = (e: LayerEvent) => {
-		if (e.layerType == "marker") {
-			const marker = e.layer as L.Marker
-			console.log(marker.getLatLng())
-			console.log(mapRef.current?.getZoom())
-			return
-		}
+		// if (e.layerType == "marker") {
+		// 	const marker = e.layer as L.Marker
+		// 	console.log(marker.getLatLng())
+		// 	console.log(mapRef.current?.getZoom())
+		// 	return
+		// }
 		const drawnItems = fgRef.current?.getLayers()
 		if (drawnItems!.length > 1) {
 			drawnItems!.forEach((layer, index) => {
