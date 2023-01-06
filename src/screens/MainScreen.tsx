@@ -8,6 +8,7 @@ import { INominatimResult } from "../types/Nominatim"
 import { Prediction } from "../types/ApiCall"
 import BoundingBox from "../components/BoundingBox"
 import { API_URL } from "../libs/Config"
+import ImageSkeleton from "../components/ImageSkeleton"
 
 type ImageSize = {
 	width: number | undefined
@@ -26,6 +27,7 @@ const getAddressData = async (
 const getImage = async (lat: number, long: number) => {
 	// const url = "http://34.87.112.231:7546/api/v1/inference/image"
 	const url = `${API_URL}/api/v1/inference/image`
+	const token = localStorage.getItem("access_token")
 	const response = await fetch(url, {
 		method: "POST",
 		body: JSON.stringify({
@@ -33,8 +35,7 @@ const getImage = async (lat: number, long: number) => {
 			long: long,
 		}),
 		headers: new Headers({
-			Authorization:
-				"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiYWNjZXNzX3Rva2VuIiwiZXhwIjoxNjczNDUwMTc4LCJpYXQiOjE2NzI4NDUzNzgsInN1YiI6InJpZnFpIn0.NSki-Tcl21lhB3ZHivOMcEU4nbEluRuJAytk8dxT8wQ",
+			Authorization: `Bearer ${token}`,
 			"Content-Type": "application/json",
 		}),
 	})
@@ -46,6 +47,7 @@ const getImage = async (lat: number, long: number) => {
 const predictImage = async (lat: number, long: number) => {
 	// const url = "http://34.87.112.231:7546/api/v1/inference/predict"
 	const url = `${API_URL}/api/v1/inference/predict`
+	const token = localStorage.getItem("access_token")
 	const response = await fetch(url, {
 		method: "POST",
 		body: JSON.stringify({
@@ -53,8 +55,7 @@ const predictImage = async (lat: number, long: number) => {
 			long: long,
 		}),
 		headers: new Headers({
-			Authorization:
-				"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiYWNjZXNzX3Rva2VuIiwiZXhwIjoxNjczNDUwMTc4LCJpYXQiOjE2NzI4NDUzNzgsInN1YiI6InJpZnFpIn0.NSki-Tcl21lhB3ZHivOMcEU4nbEluRuJAytk8dxT8wQ",
+			Authorization: `Bearer ${token}`,
 			"Content-Type": "application/json",
 		}),
 	})
@@ -76,9 +77,11 @@ const MainScreen = () => {
 	const [locationFound, setLocationFound] = useState<boolean | null>(null)
 	const [imageSize, setImageSize] = useState<ImageSize | null>(null)
 	const [predicted, setPredicted] = useState<boolean>(false)
+	const [imageLoad, setImageLoad] = useState<boolean | null>(null)
 
 	const onPredict = async (e: SyntheticEvent) => {
 		e.preventDefault()
+		setImageLoad(true)
 		if (latLong !== null || latLong !== undefined) {
 			setButtonLatLong(latLong)
 		}
@@ -90,18 +93,21 @@ const MainScreen = () => {
 
 		const lat = latLong?.center.lat as number
 		const long = latLong?.center.lng as number
-		predictImage(lat, long).then((data) => {
-			setPrediction(data)
-			setPredicted(true)
+		console.log(latLong)
+		predictImage(lat, long)
+			.then((data) => {
+				setPrediction(data)
+				setPredicted(true)
 
-			// const width = imgRef.current?.clientWidth as number
-			// const height = imgRef.current?.clientHeight as number
-			const width = 640
-			const height = 640
-			console.log(data)
-			console.log(prediction)
-			setImageSize({ width: width, height: height })
-		})
+				// const width = imgRef.current?.clientWidth as number
+				// const height = imgRef.current?.clientHeight as number
+				const width = 640
+				const height = 640
+				console.log(data)
+				console.log(prediction)
+				setImageSize({ width: width, height: height })
+			})
+			.then(() => setImageLoad(false))
 
 		getImage(lat, long).then((data) => {
 			setPredictedImage(data)
@@ -162,13 +168,16 @@ const MainScreen = () => {
 							Predict
 						</button>
 					</div>
-					{buttonLatLong ? (
-						<h1 className="items-center justify-center">
-							{JSON.stringify(buttonLatLong)}
-						</h1>
+					{/* {buttonLatLong ? ( */}
+					{/* 	<h1 className="items-center justify-center"> */}
+					{/* 		{JSON.stringify(buttonLatLong)} */}
+					{/* 	</h1> */}
+					{/* ) : null} */}
+					{imageLoad === true && predictedImage === undefined ? (
+						<ImageSkeleton className="py-3" />
 					) : null}
-					<div className="container relative bg-red-100 w-[640px]">
-						<div className="container absolute top-0 left-0 inline-block">
+					{prediction ? (
+						<div className="container relative bg-red-100 w-[640px] h-[640px] my-5">
 							{predictedImage ? (
 								<img
 									ref={imgRef}
@@ -184,11 +193,13 @@ const MainScreen = () => {
 									prediction_data={prediction}
 								/>
 							) : null}
-							{prediction ? (
-								<h2 key={prediction.count}>Count: {prediction.count}</h2>
-							) : null}
 						</div>
-					</div>
+					) : null}
+					{prediction ? (
+						<h2 className="py-4" key={prediction.count}>
+							Count: {prediction.count}
+						</h2>
+					) : null}
 				</div>
 			</div>
 		</>

@@ -135,25 +135,25 @@ const LoginScreen = () => {
 										: "border-brightRedLight"
 								}`}
 								{...register("password", {
-									minLength: {
-										value: 8,
-										message: "Password must be greater than 8.",
-									},
-									maxLength: {
-										value: 20,
-										message: "Password must be lesser than 20.",
-									},
+									// minLength: {
+									// 	value: 8,
+									// 	message: "Password must be greater than 8.",
+									// },
+									// maxLength: {
+									// 	value: 20,
+									// 	message: "Password must be lesser than 20.",
+									// },
 									required: {
 										value: true,
 										message: "Password is required",
 									},
 								})}
 							/>
-							{errors.password && (
+							{errors.password && userFound !== false ? (
 								<p className="text-red-500 text-sm mt-2">
 									{errors.password.message}
 								</p>
-							)}
+							) : null}
 							{userFound === false ? (
 								<p className="text-red-500 text-sm mt-2">
 									Incorrect username or password!
