@@ -6,10 +6,8 @@ import L, { LatLngExpression } from "leaflet"
 import { IAreaProps } from "../types/LatLong"
 import { INominatimResult } from "../types/Nominatim"
 import { Prediction } from "../types/ApiCall"
-import type P5 from "p5"
 import BoundingBox from "../components/BoundingBox"
-import Sketch from "react-p5"
-import BBox from "../components/BBox"
+import { API_URL } from "../libs/Config"
 
 type ImageSize = {
 	width: number | undefined
@@ -26,7 +24,8 @@ const getAddressData = async (
 }
 
 const getImage = async (lat: number, long: number) => {
-	const url = "http://34.87.112.231:7546/api/v1/inference/image"
+	// const url = "http://34.87.112.231:7546/api/v1/inference/image"
+	const url = `${API_URL}/api/v1/inference/image`
 	const response = await fetch(url, {
 		method: "POST",
 		body: JSON.stringify({
@@ -45,7 +44,8 @@ const getImage = async (lat: number, long: number) => {
 	return imageObjectURL
 }
 const predictImage = async (lat: number, long: number) => {
-	const url = "http://34.87.112.231:7546/api/v1/inference/predict"
+	// const url = "http://34.87.112.231:7546/api/v1/inference/predict"
+	const url = `${API_URL}/api/v1/inference/predict`
 	const response = await fetch(url, {
 		method: "POST",
 		body: JSON.stringify({
@@ -66,13 +66,16 @@ const predictImage = async (lat: number, long: number) => {
 const MainScreen = () => {
 	const mapRef = useRef<L.Map>(null)
 	const imgRef = useRef<HTMLImageElement>(null)
-	const [predictedImage, setPredictedImage] = useState<string | null>(null)
+	const [predictedImage, setPredictedImage] = useState<string | undefined>(
+		undefined
+	)
 	const [prediction, setPrediction] = useState<Prediction | undefined>()
 	const [latLong, setLatLong] = useState<IAreaProps>()
 	const [buttonLatLong, setButtonLatLong] = useState<IAreaProps>()
 	const [searchQuery, setSearchQuery] = useState<string | undefined>()
 	const [locationFound, setLocationFound] = useState<boolean | null>(null)
 	const [imageSize, setImageSize] = useState<ImageSize | null>(null)
+	const [predicted, setPredicted] = useState<boolean>(false)
 
 	const onPredict = async (e: SyntheticEvent) => {
 		e.preventDefault()
@@ -80,10 +83,16 @@ const MainScreen = () => {
 			setButtonLatLong(latLong)
 		}
 
+		if (predicted === true) {
+			setPrediction(undefined)
+			setPredictedImage(undefined)
+		}
+
 		const lat = latLong?.center.lat as number
 		const long = latLong?.center.lng as number
 		predictImage(lat, long).then((data) => {
 			setPrediction(data)
+			setPredicted(true)
 
 			// const width = imgRef.current?.clientWidth as number
 			// const height = imgRef.current?.clientHeight as number
@@ -175,7 +184,9 @@ const MainScreen = () => {
 									prediction_data={prediction}
 								/>
 							) : null}
-							{prediction ? <div>Count: {prediction.count}</div> : null}
+							{prediction ? (
+								<h2 key={prediction.count}>Count: {prediction.count}</h2>
+							) : null}
 						</div>
 					</div>
 				</div>

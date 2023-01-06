@@ -14,6 +14,7 @@
 		"@types/react-leaflet": "^2.8.2",
 		"@types/react-router-dom": "^5.3.3",
 		"dom-to-image-more": "^2.12.0",
+		"dotenv": "^16.0.3",
 		"konva": "^8.3.14",
 		"leaflet": "^1.9.3",
 		"leaflet-draw": "^1.0.4",

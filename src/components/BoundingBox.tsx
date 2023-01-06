@@ -33,20 +33,26 @@ const BoundingBox: FC<IBoundingBoxProps> = ({
 		p5.strokeWeight(2)
 		// Disables filling geometry
 		p5.noFill()
+
 		// draw an rectangle
 		// x and y are the coordinates of upper-left corner, followed by width and height
-		const imageWidth = img_width as number
-		const imageHeight = img_height as number
+		// const imageWidth = img_width as number
+		// const imageHeight = img_height as number
 		if (prediction_data !== undefined) {
-			prediction_data.yolo_bbox.map((data) => {
+			prediction_data.coco_bbox.map((data) => {
 				// x, y, w, h
-				const x = Math.floor(data[0] * imageWidth)
-				const y = Math.floor(data[1] * imageHeight)
-				const x2 = Math.floor(data[2] * imageWidth)
-				const y2 = Math.floor(data[3] * imageHeight)
+				// const x = Math.floor(data[0] * imageWidth)
+				// const y = Math.floor(data[1] * imageHeight)
+				// const x2 = Math.floor(data[2] * imageWidth)
+				// const y2 = Math.floor(data[3] * imageHeight)
 
-				const w = x2 - x
-				const h = y2 - y
+				// const w = x2 - x
+				// const h = y2 - y
+
+				const x = data[0]
+				const y = data[1]
+				const w = data[2]
+				const h = data[3]
 				p5.rect(x, y, w, h)
 			})
 		}

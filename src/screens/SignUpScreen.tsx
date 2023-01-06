@@ -1,12 +1,30 @@
-import { SubmitErrorHandler, SubmitHandler, useForm } from "react-hook-form"
-import { Link, useNavigate } from "react-router-dom"
+import React, { useForm } from "react-hook-form"
+import { useNavigate } from "react-router-dom"
 import Navbar from "../components/Navbar"
+import { API_URL } from "../libs/Config"
 
 interface FormData {
-	email: string
+	username: string
 	name: string
 	password: string
 	validatePassword: string
+}
+
+async function signUp(name: string, username: string, password: string) {
+	const url = `${API_URL}/api/v1/auth/signup`
+	const response = await fetch(url, {
+		method: "POST",
+		body: JSON.stringify({
+			name: name,
+			username: username,
+			password: password,
+		}),
+		headers: new Headers({
+			"Content-Type": "application/json",
+		}),
+	})
+
+	return response
 }
 
 const SignUpScreen = () => {
@@ -14,6 +32,7 @@ const SignUpScreen = () => {
 		register,
 		handleSubmit,
 		watch,
+		setError,
 		formState: { errors },
 	} = useForm<FormData>({
 		mode: "onChange",
@@ -23,13 +42,29 @@ const SignUpScreen = () => {
 
 	const password = watch("password")
 
-	const onSubmit = (data: FormData) => {
-		navigate("/")
+	const onSubmit = async (data: FormData) => {
+		signUp(data.name, data.username, data.password)
+			.then((response: Response) => {
+				if (!response.ok) {
+					console.log(response.json())
+					setError("username", {
+						message: "Username already exists",
+						type: "custom",
+					})
+					return
+				}
+				navigate("/login")
+			})
+			.catch((e) => {
+				const errors = e as Response
+				if (!errors.ok) {
+					setError("username", {
+						message: "Username already exists",
+						type: "custom",
+					})
+				}
+			})
 	}
-
-	// const onSubmit = handleSubmit(({ email, password, name }) => {
-	// 	console.log(email, password, name)
-	// })
 
 	return (
 		<>
@@ -82,35 +117,35 @@ const SignUpScreen = () => {
 						<div>
 							<label
 								className={`text-sm font-bold text-gray-400 block ${
-									errors.email
+									errors.username
 										? "text-red-500 border-red-500"
 										: "border-brightRedLight"
 								}`}
 							>
-								Email
+								Username
 							</label>
 							<input
 								type="text"
 								placeholder="Enter your email here..."
 								className={`w-full p-2 border  rounded mt-1 focus:outline-0 ${
-									errors.email
+									errors.username
 										? "text-red-500 border-red-500"
 										: "border-brightRedLight"
 								}`}
-								{...register("email", {
+								{...register("username", {
 									required: {
 										value: true,
-										message: "Email is required",
+										message: "Username is required",
 									},
-									pattern: {
-										value: /^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,63})$/,
-										message: "Email is invalid",
-									},
+									// pattern: {
+									// 	value: /^([a-z0-9_.-]+)@([\da-z.-]+)\.([a-z.]{2,63})$/,
+									// 	message: "Email is invalid",
+									// },
 								})}
 							/>
-							{errors.email && (
+							{errors.username && (
 								<p className="text-red-500 text-sm mt-2">
-									{errors.email.message}
+									{errors.username.message}
 								</p>
 							)}
 						</div>
@@ -146,6 +181,12 @@ const SignUpScreen = () => {
 									required: {
 										value: true,
 										message: "Password is required",
+									},
+									pattern: {
+										value:
+											/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/,
+										message:
+											"Password must contains one lowercase, one uppercase, one number, and one special characters.",
 									},
 								})}
 							/>
