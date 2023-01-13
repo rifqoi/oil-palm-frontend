@@ -8,6 +8,7 @@ import SignUpScreen from "./screens/SignUpScreen"
 import MainScreen from "./screens/MainScreen"
 import NotFoundScreen from "./screens/NotFoundScreen"
 import RequireAuth from "./components/RequireAuth"
+import MapScreen from "./screens/MapScreen"
 
 function App(): JSX.Element {
 	return (
@@ -21,6 +22,7 @@ function App(): JSX.Element {
 					<Route element={<RequireAuth />}>
 						<Route path="/map" element={<MainScreen />} />
 					</Route>
+					<Route path="/test" element={<MapScreen />} />
 					<Route path="*" element={<NotFoundScreen />} />
 				</Routes>
 			</Router>

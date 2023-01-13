@@ -5,6 +5,7 @@ import L from "leaflet"
 import { EditControl } from "react-leaflet-draw"
 import { LatLong, IAreaProps } from "../types/LatLong"
 import { AttributionControl } from "react-leaflet"
+import { Rectangle } from "react-leaflet"
 
 const LeafletMap: FC<
 	{
@@ -51,6 +52,7 @@ const LeafletMap: FC<
 	return (
 		<>
 			<MapContainer
+				// className="h-[30rem] w-3/4 md:h-[30rem] md:w-3/4"
 				className="h-[30rem] w-3/4 md:h-[30rem] md:w-3/4"
 				maxZoom={20}
 				ref={mapRef}
@@ -84,6 +86,12 @@ const LeafletMap: FC<
 					maxZoom={20}
 				/>
 				{children}
+				<Rectangle
+					bounds={[
+						[-6.472634489929272, 107.02520310434704],
+						[-6.4727091130627175, 107.02527686509495],
+					]}
+				/>
 			</MapContainer>
 		</>
 	)

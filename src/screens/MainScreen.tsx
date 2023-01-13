@@ -5,10 +5,11 @@ import SearchMap from "../components/SearchMap"
 import L, { LatLngExpression } from "leaflet"
 import { IAreaProps } from "../types/LatLong"
 import { INominatimResult } from "../types/Nominatim"
-import { Prediction } from "../types/ApiCall"
+import { Prediction, Tree } from "../types/ApiCall"
 import BoundingBox from "../components/BoundingBox"
 import { API_URL } from "../libs/Config"
 import ImageSkeleton from "../components/ImageSkeleton"
+import Boxes from "../components/Boxes"
 
 type ImageSize = {
 	width: number | undefined
@@ -72,19 +73,17 @@ const MainScreen = () => {
 	)
 	const [prediction, setPrediction] = useState<Prediction | undefined>()
 	const [latLong, setLatLong] = useState<IAreaProps>()
-	const [buttonLatLong, setButtonLatLong] = useState<IAreaProps>()
 	const [searchQuery, setSearchQuery] = useState<string | undefined>()
 	const [locationFound, setLocationFound] = useState<boolean | null>(null)
 	const [imageSize, setImageSize] = useState<ImageSize | null>(null)
 	const [predicted, setPredicted] = useState<boolean>(false)
 	const [imageLoad, setImageLoad] = useState<boolean | null>(null)
 
+	const [trees, setTrees] = useState<Tree[] | null>(null)
+
 	const onPredict = async (e: SyntheticEvent) => {
 		e.preventDefault()
 		setImageLoad(true)
-		if (latLong !== null || latLong !== undefined) {
-			setButtonLatLong(latLong)
-		}
 
 		if (predicted === true) {
 			setPrediction(undefined)
@@ -105,6 +104,7 @@ const MainScreen = () => {
 				const height = 640
 				console.log(data)
 				console.log(prediction)
+				setTrees(data.trees)
 				setImageSize({ width: width, height: height })
 			})
 			.then(() => setImageLoad(false))
@@ -142,8 +142,9 @@ const MainScreen = () => {
 				<div className="container flex flex-col  ml-12">
 					<div className="">
 						<SearchMap
+							className="w-full max-w-lg"
 							setSearchQuery={setSearchQuery}
-							onSubmit={onSearch}
+							onSearch={onSearch}
 						></SearchMap>
 					</div>
 					{locationFound === false ? (
@@ -157,7 +158,7 @@ const MainScreen = () => {
 							mapRef={mapRef}
 							zoom={18}
 						>
-							<></>
+							{trees ? <Boxes trees={trees} /> : null}
 						</LeafletMap>
 					</div>
 					<div className="flex">
