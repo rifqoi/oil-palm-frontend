@@ -1,4 +1,5 @@
-import React, { SyntheticEvent, useRef, useState } from "react"
+import React, { SyntheticEvent, useEffect, useRef, useState } from "react"
+import Logo from "../assets/logo.png"
 import {
 	AttributionControl,
 	TileLayer,
@@ -7,11 +8,19 @@ import {
 	MapContainer,
 } from "react-leaflet"
 import { EditControl } from "react-leaflet-draw"
-import Sidebar from "../components/Sidebar"
 
 import { INominatimResult } from "../types/Nominatim"
 import { Prediction, Tree } from "../types/ApiCall"
-import { LatLngExpression } from "leaflet"
+import { LatLngBoundsLiteral, LatLngExpression } from "leaflet"
+import SidebarEmpty from "../components/SidebarEmpty"
+import SidebarMain from "../components/SidebarMain"
+import { AiOutlineArrowLeft, AiOutlineArrowRight } from "react-icons/ai"
+import SearchMap from "../components/SearchMap"
+import { ZoomControl } from "react-leaflet"
+import SidebarPredictImage from "../components/SidebarPredictImage"
+
+import { LeafletMouseEvent, LatLng, LatLngBounds } from "leaflet"
+import { Popup } from "react-leaflet"
 
 const getAddressData = async (
 	address: string | undefined
@@ -26,16 +35,66 @@ const MapScreen = () => {
 	const fgRef = useRef<L.FeatureGroup>(null)
 	const mapRef = useRef<L.Map>(null)
 	const [searchQuery, setSearchQuery] = useState<string | undefined>()
-	const [predictionHistory, setPredictionHistory] = useState<boolean>(false)
-	const [treeLocations, setTreeLocations] = useState<boolean>(false)
+	const [sbPredictTree, setSBPredictTree] = useState<boolean>(false)
+	const [sbPredictionHistory, setSBPredictionHistory] = useState<boolean>(false)
+	const [sbTreeLocations, setSBTreeLocations] = useState<boolean>(false)
+	const [sbMoveFromMain, setSBMoveFromMain] = useState<boolean>(false)
 	const [locationFound, setLocationFound] = useState<boolean | null>(null)
+	const [rectangleMouse, setRectangleMouse] = useState<LatLngBounds | null>(
+		null
+	)
+	const [rectangleCenter, setRectangleCenter] = useState<LatLng>()
+	const [mouseMoveEvent, setMouseMoveEvent] = useState<boolean>(false)
+	const rectRef = useRef<L.Rectangle>(null)
 
 	const onPredictionHistory = (e: SyntheticEvent) => {
-		setPredictionHistory(true)
+		console.log("prediction")
+		setSBMoveFromMain(true)
+		setSBPredictionHistory(true)
 	}
 
+	const onPredictTree = (e: SyntheticEvent) => {
+		setSBMoveFromMain(true)
+		setSBPredictTree(true)
+		if (mapRef.current && !sbMoveFromMain) {
+			mapRef.current.on("mousemove", (e: LeafletMouseEvent) => {
+				setMouseMoveEvent(true)
+				setRectangleMouse(e.latlng.toBounds(100))
+				console.log(rectRef.current?.getCenter())
+			})
+			mapRef.current.on("click", (e: LeafletMouseEvent) => {
+				setMouseMoveEvent(false)
+				console.log("clicL", rectRef.current?.getCenter())
+			})
+		}
+	}
+
+	useEffect(() => {
+		if (mapRef.current) {
+			const map = mapRef.current
+
+			if (!mouseMoveEvent) {
+				console.log("mati")
+				setRectangleCenter(rectRef.current?.getCenter())
+				console.log(rectangleCenter)
+				map.off("mousemove")
+			}
+		}
+	}, [mouseMoveEvent, mapRef, rectRef])
+
 	const onTreeLocations = (e: SyntheticEvent) => {
-		setTreeLocations(true)
+		setSBMoveFromMain(true)
+		setSBTreeLocations(true)
+	}
+
+	const onPrevious = (e: SyntheticEvent) => {
+		setSBMoveFromMain(false)
+		setSBTreeLocations(false)
+		setSBPredictTree(false)
+		setSBPredictionHistory(false)
+		setMouseMoveEvent(false)
+		setRectangleMouse(null)
+		setRectangleCenter(undefined)
 	}
 
 	const onSearch = async (e: SyntheticEvent) => {
@@ -61,27 +120,55 @@ const MapScreen = () => {
 	return (
 		<>
 			<div className="flex">
-				<div className="z-0">
-					<Sidebar
-						onSearch={onSearch}
-						onTreeLocations={onTreeLocations}
-						onPredictionHistory={onPredictionHistory}
-						setSearchQuery={setSearchQuery}
-					></Sidebar>
+				<div
+					className={`container flex flex-col z-50 relative bg-white px-5 w-3/12 h-screen ${
+						!sbMoveFromMain && "pt-5"
+					}`}
+				>
+					{sbMoveFromMain ? null : (
+						<img
+							className="text-center mr-auto self-center h-5 sm:h-10"
+							src={Logo}
+							alt=""
+						/>
+					)}
+					<div className="flex flex-col flex-1 py-5 justify-between pb-5">
+						<div>
+							<SidebarEmpty className="">
+								{!sbPredictTree && !sbPredictionHistory && !sbTreeLocations ? (
+									<SidebarMain
+										onPredictTree={onPredictTree}
+										onTreeLocations={onTreeLocations}
+										onPredictionHistory={onPredictionHistory}
+									/>
+								) : null}
+								{sbPredictTree ? (
+									<SidebarPredictImage onPrevious={onPrevious} />
+								) : null}
+							</SidebarEmpty>
+						</div>
+						<div className="items-start">asdasd</div>
+					</div>
 				</div>
+				<SearchMap
+					onSearch={onSearch}
+					setSearchQuery={setSearchQuery}
+					className="w-2/3 h-10 z-10 py-5 px-5"
+				/>
 				<MapContainer
+					zoomControl={false}
 					center={[-6.471428154696355, 107.02629987019694]}
 					ref={mapRef}
 					zoom={18}
 					// className="h-[30rem] w-3/4 md:h-[30rem] md:w-3/4"
-					className="w-full h-[100vh] z-10"
-					maxZoom={22}
+					className="w-full h-screen z-0 absolute"
+					maxZoom={21}
 					attributionControl={false}
 				>
 					<AttributionControl prefix={false} />
 					<FeatureGroup ref={fgRef}>
 						<EditControl
-							position="topleft"
+							position="bottomright"
 							draw={{
 								polyline: false,
 								circle: false,
@@ -93,6 +180,7 @@ const MapScreen = () => {
 								},
 							}}
 						/>
+						<ZoomControl position="topright" />
 					</FeatureGroup>
 					)
 					<TileLayer
@@ -108,6 +196,17 @@ const MapScreen = () => {
 							[-6.4727091130627175, 107.02527686509495],
 						]}
 					/>
+					{rectangleMouse ? (
+						<Rectangle ref={rectRef} bounds={rectangleMouse}>
+							{rectangleCenter ? (
+								<Popup>
+									Lat: {rectangleCenter.lat}
+									<br />
+									Long: {rectangleCenter?.lng}
+								</Popup>
+							) : null}
+						</Rectangle>
+					) : null}
 				</MapContainer>
 			</div>
 		</>
