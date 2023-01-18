@@ -1,10 +1,12 @@
 export interface Tree {
+	id: number
 	user_id: number
 	lat: number
 	long: number
 	nw_bounds: number[]
 	se_bounds: number[]
 	confidence: number
+	created_at: string
 }
 
 export interface Prediction {
