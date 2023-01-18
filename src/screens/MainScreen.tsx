@@ -158,7 +158,7 @@ const MainScreen = () => {
 							mapRef={mapRef}
 							zoom={18}
 						>
-							{trees ? <Boxes trees={trees} /> : null}
+							{/* {trees ? <Boxes trees={trees} /> : null} */}
 						</LeafletMap>
 					</div>
 					<div className="flex">
