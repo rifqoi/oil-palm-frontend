@@ -1,4 +1,4 @@
-import React, { FC, RefObject, SyntheticEvent } from "react"
+import React, { FC, MutableRefObject, RefObject, SyntheticEvent } from "react"
 import L, { LatLngExpression } from "leaflet"
 
 const TreeCard: FC<{
@@ -7,18 +7,24 @@ const TreeCard: FC<{
 	long: number
 	predicted_at: string
 	mapRef: RefObject<L.Map>
-	rectRef: L.Rectangle | undefined
-	popupRef: L.Popup | undefined
+	rectRef: MutableRefObject<Map<number, L.Rectangle> | null>
+	popupRef: MutableRefObject<Map<number, L.Popup> | null>
+	// rectRef: L.Rectangle | undefined
+	// popupRef: L.Popup | undefined
 }> = ({ lat, long, predicted_at, id, rectRef, popupRef, mapRef }) => {
 	const flyToBox = (e: SyntheticEvent) => {
 		e.preventDefault()
-		console.log("map", mapRef)
-		console.log(rectRef)
-		console.log(popupRef)
-		const center = rectRef?.getCenter() as LatLngExpression
-		mapRef.current?.flyTo(center, 18)
-
-		popupRef?.openPopup()
+		const myRect = rectRef.current?.get(id)
+		const center = [lat, long] as LatLngExpression
+		mapRef.current?.flyTo(center, 20, {
+			animate: true,
+			duration: 1,
+		})
+		console.log(myRect?.getCenter())
+		console.log(myRect?.getBounds())
+		setTimeout(() => {
+			myRect?.openPopup(center)
+		}, 500)
 	}
 	return (
 		<div className="w-full border-2 border-gray-500 rounded-md text-md my-2">

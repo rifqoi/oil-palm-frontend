@@ -145,6 +145,10 @@ const MapScreen = () => {
 		setRectangleCenter(undefined)
 		setLoading(true)
 
+		if (trees) {
+			setTrees(null)
+		}
+
 		if (predicted === true) {
 			setPrediction(undefined)
 		}
@@ -159,7 +163,6 @@ const MapScreen = () => {
 			setTrees(data.trees)
 			setLoading(false)
 			setSBLoadTreeCard(true)
-			console.log(rectRefs)
 			console.log(popupRefs)
 		})
 	}
@@ -205,7 +208,7 @@ const MapScreen = () => {
 									onSelectArea={onSelectArea}
 								/>
 							) : null}
-							{sbLoadTreeCard ? (
+							{sbLoadTreeCard && popupRefs && rectRefs ? (
 								<SidebarPredictedTree
 									rectRef={rectRefs}
 									popupRef={popupRefs}

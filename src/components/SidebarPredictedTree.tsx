@@ -3,7 +3,6 @@ import React, {
 	MutableRefObject,
 	ReactEventHandler,
 	RefObject,
-	useState,
 } from "react"
 import { Tree } from "../types/ApiCall"
 import SidebarStickyPrevious from "./SidebarStickyPrevious"
@@ -16,33 +15,28 @@ const SidebarPredictedTree: FC<{
 	popupRef: MutableRefObject<Map<number, L.Popup> | null>
 	trees: Tree[] | null
 }> = ({ onPrevious, trees, mapRef, rectRef, popupRef }) => {
-	const [emptyPrediction, setEmptyPrediction] = useState<boolean | null>(null)
-	if (trees !== null) {
-		if (trees.length < 1) {
-			setEmptyPrediction(true)
-		}
-	}
-	console.log(trees)
 	return (
 		<>
 			<SidebarStickyPrevious
 				onPrevious={onPrevious}
 				sectionName="Predict Tree"
 			/>
-			{trees?.map((v) => {
-				return (
-					<TreeCard
-						key={"tree" + v.id}
-						rectRef={rectRef.current?.get(v.id)}
-						mapRef={mapRef}
-						popupRef={popupRef?.current?.get(v.id)}
-						id={v.id}
-						long={v.long}
-						lat={v.lat}
-						predicted_at={v.created_at}
-					/>
-				)
-			})}
+			{popupRef &&
+				rectRef &&
+				trees?.map((tree) => {
+					return (
+						<TreeCard
+							key={"tree" + tree.id}
+							rectRef={rectRef}
+							mapRef={mapRef}
+							popupRef={popupRef}
+							id={tree.id}
+							long={tree.long}
+							lat={tree.lat}
+							predicted_at={tree.created_at}
+						/>
+					)
+				})}
 		</>
 	)
 }
