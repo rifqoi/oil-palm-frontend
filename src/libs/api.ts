@@ -1,4 +1,5 @@
-import { Prediction } from "../types/ApiCall"
+import useToken from "../hooks/useToken"
+import { Prediction, Tree } from "../types/ApiCall"
 import { API_URL } from "./Config"
 
 const getImage = async (lat: number, long: number) => {
@@ -41,4 +42,21 @@ const predictImage = async (lat: number, long: number) => {
 	return data
 }
 
-export { getImage, predictImage }
+const getTreesHistory = async (): Promise<Tree[]> => {
+	const url = `${API_URL}/api/v1/inference/trees`
+	const token = localStorage.getItem("access_token")
+
+	const response = await fetch(url, {
+		method: "GET",
+		headers: new Headers({
+			Authorization: `Bearer ${token}`,
+			"Content-Type": "application/json",
+		}),
+	})
+
+	const data: Tree[] = await response.json()
+	return data
+}
+
+export { getImage, predictImage, getTreesHistory }
+

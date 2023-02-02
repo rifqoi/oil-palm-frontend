@@ -14,8 +14,6 @@ const Boxes: FC<{
 
 	const getRectMap = () => {
 		if (!rectRefs.current) {
-			console.log("masuk refBoxes")
-			console.log(rectRefs)
 			rectRefs.current = new Map()
 		}
 
@@ -24,8 +22,6 @@ const Boxes: FC<{
 
 	const getPopupMap = () => {
 		if (!popupRefs.current) {
-			console.log("masuk popupBoxes")
-			console.log(popupRefs)
 			popupRefs.current = new Map()
 		}
 
@@ -41,11 +37,9 @@ const Boxes: FC<{
 						ref={(props) => {
 							const map = getRectMap()
 							if (props) {
-								console.log(tree.id, props)
-								console.log(tree.nw_bounds, tree.se_bounds)
-								map.set(tree.id, props)
+								map.set(tree.tree_id, props)
 							} else {
-								map.delete(tree.id)
+								map.delete(tree.tree_id)
 							}
 						}}
 						bounds={[
@@ -57,9 +51,9 @@ const Boxes: FC<{
 							ref={(props) => {
 								const map = getPopupMap()
 								if (props) {
-									map?.set(tree.id, props)
+									map?.set(tree.tree_id, props)
 								} else {
-									map?.delete(tree.id)
+									map?.delete(tree.tree_id)
 								}
 							}}
 						>

@@ -16,18 +16,22 @@ import { AiOutlineArrowLeft, AiOutlineArrowRight } from "react-icons/ai"
 import SearchMap from "../components/SearchMap"
 import { ZoomControl } from "react-leaflet"
 import SidebarPredictImage from "../components/SidebarPredictImage"
+import "leaflet-path-drag"
+import "leaflet-draw"
 
-import {
+import L, {
 	LeafletMouseEvent,
 	LatLng,
 	LatLngBounds,
 	LatLngExpression,
+	LatLngBoundsLiteral,
 } from "leaflet"
 import { Popup } from "react-leaflet"
-import { predictImage } from "../libs/api"
+import { getTreesHistory, predictImage } from "../libs/api"
 import Boxes from "../components/Boxes"
 import SidebarTreeLocations from "../components/SidebarTreeLocations"
 import SidebarPredictedTree from "../components/SidebarPredictedTree"
+import { Polygon } from "react-leaflet"
 
 const getAddressData = async (
 	address: string | undefined
@@ -36,6 +40,33 @@ const getAddressData = async (
 	const response = await fetch(url)
 	const data = await response.json()
 	return data
+}
+
+const getPolygonPointFromBounds = (latLngBounds: L.LatLngBounds) => {
+	const center = latLngBounds.getCenter()
+	const latlngs = []
+
+	latlngs.push(latLngBounds.getSouthWest()) //bottom left
+	latlngs.push({ lat: latLngBounds.getSouth(), lng: center.lng }) //bottom center
+	latlngs.push(latLngBounds.getSouthEast()) //bottom right
+	latlngs.push({ lat: center.lat, lng: latLngBounds.getEast() }) // center right
+	latlngs.push(latLngBounds.getNorthEast()) //top right
+	latlngs.push({
+		lat: latLngBounds.getNorth(),
+		lng: latLngBounds.getCenter().lng,
+	}) //top center
+	latlngs.push(latLngBounds.getNorthWest()) //top left
+	latlngs.push({
+		lat: latLngBounds.getCenter().lat,
+		lng: latLngBounds.getWest(),
+	}) //center left
+
+	return latlngs
+}
+
+type Transform = {
+	matrix: any
+	end: boolean
 }
 
 const MapScreen = () => {
@@ -47,7 +78,8 @@ const MapScreen = () => {
 	const [closeSidebar, setCloseSidebar] = useState<boolean>(false)
 	const [searchQuery, setSearchQuery] = useState<string | undefined>()
 	const [sbPredictTree, setSBPredictTree] = useState<boolean>(false)
-	const [sbPredictionHistory, setSBPredictionHistory] = useState<boolean>(false)
+	const [sbPredictionHistory, setSBPredictionHistory] =
+		useState<boolean>(false)
 	const [sbTreeLocations, setSBTreeLocations] = useState<boolean>(false)
 	const [sbMoveFromMain, setSBMoveFromMain] = useState<boolean>(false)
 	const [locationFound, setLocationFound] = useState<boolean | null>(null)
@@ -61,6 +93,8 @@ const MapScreen = () => {
 	const [predicted, setPredicted] = useState<boolean>(false)
 	const [sbLoadTreeCard, setSBLoadTreeCard] = useState<boolean>(false)
 	const [trees, setTrees] = useState<Tree[] | null>(null)
+	const [loadTrees, setLoadTrees] = useState<boolean>(false)
+	const [editTreeID, setEditTreeID] = useState<number | null>(null)
 
 	useEffect(() => {
 		if (mapRef.current) {
@@ -83,6 +117,11 @@ const MapScreen = () => {
 		setSBPredictTree(true)
 	}
 
+	const bounds = [
+		[-6.470495720018312, 107.0268509108695],
+		[-6.471394035295384, 107.02594683585174],
+	] as LatLngBoundsLiteral
+
 	const onSelectArea = (e: SyntheticEvent) => {
 		if (rectangleCenter) {
 			setRectangleCenter(undefined)
@@ -93,9 +132,29 @@ const MapScreen = () => {
 				setRectangleMouse(e.latlng.toBounds(100))
 			})
 			mapRef.current.on("click", (e: LeafletMouseEvent) => {
+				console.log("rectmouse", rectangleMouse)
 				setMouseMoveEvent(false)
 			})
 		}
+	}
+
+	const onEditTree = (e: SyntheticEvent) => {
+		setSBLoadTreeCard(false)
+		setLoadTrees(false)
+		if (editTreeID) {
+			return
+		}
+
+		// TODO: Update tree in db
+
+		trees?.map((tree) => {
+			if (tree.id === editTreeID) {
+				// TODO: Update state of the tree.
+
+				// TODO: Create new useState for the tree
+				return
+			}
+		})
 	}
 
 	const onCloseSideBar = (e: SyntheticEvent) => {
@@ -121,7 +180,9 @@ const MapScreen = () => {
 	const onSearch = async (e: SyntheticEvent) => {
 		e.preventDefault()
 		if (searchQuery === undefined) return
-		const addressData: INominatimResult[] = await getAddressData(searchQuery)
+		const addressData: INominatimResult[] = await getAddressData(
+			searchQuery
+		)
 		if (addressData.length < 1) {
 			setLocationFound(false)
 			return
@@ -147,6 +208,7 @@ const MapScreen = () => {
 
 		if (trees) {
 			setTrees(null)
+			setLoadTrees(false)
 		}
 
 		if (predicted === true) {
@@ -155,15 +217,32 @@ const MapScreen = () => {
 
 		const lat = rectangleCenter?.lat as number
 		const long = rectangleCenter?.lng as number
-		console.log(lat, long)
 		predictImage(lat, long).then((data) => {
 			setPrediction(data)
 			setPredicted(true)
 
 			setTrees(data.trees)
+			setLoadTrees(true)
 			setLoading(false)
 			setSBLoadTreeCard(true)
 			console.log(popupRefs)
+		})
+	}
+
+	const onTreeHistory = (e: SyntheticEvent) => {
+		e.preventDefault()
+		setSBMoveFromMain(true)
+		setSBTreeLocations(true)
+		if (trees) {
+			setTrees(null)
+			setLoadTrees(false)
+		}
+
+		getTreesHistory().then((tree) => {
+			console.log(tree)
+			setTrees(tree)
+			setLoadTrees(true)
+			console.log(trees)
 		})
 	}
 
@@ -186,12 +265,16 @@ const MapScreen = () => {
 							/>
 						)}
 						{/* <div className={`flex flex-col ${closeSidebar && "hidden"}`}> */}
-						<SidebarEmpty className={`py-5 ${closeSidebar ? "hidden" : ""}`}>
-							{!sbPredictTree && !sbPredictionHistory && !sbTreeLocations ? (
+						<SidebarEmpty
+							className={`py-5 ${closeSidebar ? "hidden" : ""}`}
+						>
+							{!sbPredictTree &&
+							!sbPredictionHistory &&
+							!sbTreeLocations ? (
 								<SidebarMain
 									className="h-screen"
 									onPredictTree={onPredictTree}
-									onTreeLocations={onTreeLocations}
+									onTreeLocations={onTreeHistory}
 									onPredictionHistory={onPredictionHistory}
 								/>
 							) : null}
@@ -217,8 +300,14 @@ const MapScreen = () => {
 									trees={trees}
 								/>
 							) : null}
-							{sbTreeLocations ? (
-								<SidebarTreeLocations onPrevious={onPrevious} />
+							{sbTreeLocations && popupRefs && rectRefs ? (
+								<SidebarPredictedTree
+									onPrevious={onPrevious}
+									mapRef={mapRef}
+									popupRef={popupRefs}
+									rectRef={rectRefs}
+									trees={trees}
+								/>
 							) : null}
 						</SidebarEmpty>
 						{/* <div className="items-start">asdasd</div> */}
@@ -255,7 +344,7 @@ const MapScreen = () => {
 					</FeatureGroup>
 					)
 					<TileLayer
-						url="https://www.google.com/maps/vt?lyrs=s@189&gl=cn&x={x}&y={y}&z={z}"
+						url="https://www.google.cn/maps/vt?lyrs=s@189&gl=cn&x={x}&y={y}&z={z}"
 						attribution="Imagery ©2023 CNES / Airbus, Maxar Technologies, Map data ©2023 "
 						maxZoom={22}
 					/>
@@ -270,8 +359,12 @@ const MapScreen = () => {
 							) : null}
 						</Rectangle>
 					) : null}
-					{trees ? (
-						<Boxes rectRefs={rectRefs} popupRefs={popupRefs} trees={trees} />
+					{loadTrees && trees ? (
+						<Boxes
+							rectRefs={rectRefs}
+							popupRefs={popupRefs}
+							trees={trees}
+						/>
 					) : null}
 				</MapContainer>
 			</div>

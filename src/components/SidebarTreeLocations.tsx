@@ -1,20 +1,44 @@
-import React, { FC, ReactEventHandler } from "react"
+import React, {
+	FC,
+	MutableRefObject,
+	ReactEventHandler,
+	RefObject,
+} from "react"
+import { Tree } from "../types/ApiCall"
 import LoadingSpinner from "./LoadingSpinner"
 import SidebarStickyPrevious from "./SidebarStickyPrevious"
 import TreeCard from "./TreeCard"
 
 const SidebarTreeLocations: FC<{
 	onPrevious: ReactEventHandler<HTMLDivElement>
-}> = ({ onPrevious }) => {
+	mapRef: RefObject<L.Map>
+	rectRef: MutableRefObject<Map<number, L.Rectangle> | null>
+	popupRef: MutableRefObject<Map<number, L.Popup> | null>
+	trees: Tree[] | null
+}> = ({ onPrevious, mapRef, rectRef, popupRef, trees }) => {
 	return (
 		<>
 			<SidebarStickyPrevious
 				onPrevious={onPrevious}
 				sectionName="Tree Locations"
 			/>
-			<div className="flex items-center justify-center">
-				<LoadingSpinner />
-			</div>
+
+			{popupRef &&
+				rectRef &&
+				trees?.map((tree) => {
+					return (
+						<TreeCard
+							key={"tree" + tree.id}
+							rectRef={rectRef}
+							mapRef={mapRef}
+							popupRef={popupRef}
+							id={tree.id}
+							long={tree.long}
+							lat={tree.lat}
+							predicted_at={tree.created_at}
+						/>
+					)
+				})}
 		</>
 	)
 }

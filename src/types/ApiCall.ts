@@ -1,5 +1,6 @@
 export interface Tree {
 	id: number
+	tree_id: number
 	user_id: number
 	lat: number
 	long: number

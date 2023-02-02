@@ -30,7 +30,7 @@ const SidebarPredictedTree: FC<{
 							rectRef={rectRef}
 							mapRef={mapRef}
 							popupRef={popupRef}
-							id={tree.id}
+							id={tree.tree_id}
 							long={tree.long}
 							lat={tree.lat}
 							predicted_at={tree.created_at}
