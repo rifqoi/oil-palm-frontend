@@ -28,13 +28,19 @@ import L, {
 	DrawEvents,
 } from "leaflet"
 import { Popup } from "react-leaflet"
-import { deleteTree, getTreesHistory, predictImage } from "../libs/api"
+import {
+	checkUser,
+	deleteTree,
+	getTreesHistory,
+	predictImage,
+} from "../libs/api"
 import Boxes from "../components/Boxes"
 import SidebarTreeLocations from "../components/SidebarTreeLocations"
 import SidebarPredictedTree from "../components/SidebarPredictedTree"
 import { Polygon } from "react-leaflet"
 import { EditControl } from "react-leaflet-draw"
 import TreeCard from "../components/TreeCard"
+import { Navigate } from "react-router-dom"
 
 const getAddressData = async (
 	address: string | undefined
@@ -98,6 +104,12 @@ const MapScreen = () => {
 	const [trees, setTrees] = useState<Tree[] | null>(null)
 	const [loadTrees, setLoadTrees] = useState<boolean>(false)
 	const [editTreeID, setEditTreeID] = useState<number | null>(null)
+
+	checkUser().then((resp) => {
+		if (!resp.ok) {
+			return <Navigate to="/login" />
+		}
+	})
 
 	useEffect(() => {
 		if (mapRef.current) {
