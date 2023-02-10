@@ -58,5 +58,21 @@ const getTreesHistory = async (): Promise<Tree[]> => {
 	return data
 }
 
-export { getImage, predictImage, getTreesHistory }
+const deleteTree = async(id: number): Promise<Response> => {
+	const url = `${API_URL}/api/v1/inference/trees/delete/${id}`
+	const token = localStorage.getItem("access_token")
+
+	const response = await fetch(url, {
+		method: "DELETE",
+		headers: new Headers({
+			Authorization: `Bearer ${token}`,
+			"Content-Type": "application/json",
+		}),
+	})
+	console.log(response.json())
+
+	return response
+}
+
+export { getImage, predictImage, getTreesHistory, deleteTree }
 

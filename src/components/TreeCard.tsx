@@ -1,33 +1,33 @@
 import React, { FC, MutableRefObject, RefObject, SyntheticEvent } from "react"
 import L, { LatLngExpression } from "leaflet"
 import { Tree } from "../types/ApiCall"
+import { deleteTree, getTreesHistory } from "../libs/api"
 
 const TreeCard: FC<{
 	id: number
 	lat: number
 	long: number
 	predicted_at: string
-	mapRef: RefObject<L.Map>
-	rectRef: MutableRefObject<Map<number, L.Rectangle> | null>
-	popupRef: MutableRefObject<Map<number, L.Popup> | null>
-	setEditTreeID?: React.Dispatch<React.SetStateAction<number | null>>
-	// rectRef: L.Rectangle | undefined
-	// popupRef: L.Popup | undefined
+	confidence: number
+	mapRef?: RefObject<L.Map>
+	rectRef?: MutableRefObject<Map<number, L.Rectangle> | null>
+	popupRef?: MutableRefObject<Map<number, L.Popup> | null>
+	setDeleteTreeID: React.Dispatch<React.SetStateAction<number | null>>
 }> = ({
+	confidence,
 	lat,
 	long,
 	predicted_at,
 	id,
 	rectRef,
-	popupRef,
 	mapRef,
-	setEditTreeID,
+	setDeleteTreeID,
 }) => {
 	const flyToBox = (e: SyntheticEvent) => {
-		const myRect = rectRef.current?.get(id)
+		const myRect = rectRef?.current?.get(id)
 		const center = [lat, long] as LatLngExpression
 		e.preventDefault()
-		mapRef.current?.flyTo(center, 20, {
+		mapRef?.current?.flyTo(center, 20, {
 			animate: true,
 			duration: 1,
 		})
@@ -39,6 +39,12 @@ const TreeCard: FC<{
 	const onEdit = (e: SyntheticEvent) => {
 		// setEditTreeID(id)
 		return
+	}
+
+	const onDeleteClick = (e: SyntheticEvent) => {
+		const myRect = rectRef?.current?.get(id)
+		myRect?.closePopup()
+		setDeleteTreeID(id)
 	}
 
 	return (
@@ -58,6 +64,10 @@ const TreeCard: FC<{
 						<td className="pl-3">{long}</td>
 					</tr>
 					<tr>
+						<td>Confidence</td>
+						<td className="pl-3">{confidence}</td>
+					</tr>
+					<tr>
 						<td>Predicted at</td>
 						<td className="pl-3">{predicted_at}</td>
 					</tr>
@@ -66,14 +76,17 @@ const TreeCard: FC<{
 			<div className="flex justify-end py-2 px-2 relative">
 				<button
 					onClick={flyToBox}
-					className="py-2 absolute px-4 bg-yellow-400 mx-4 rounded-md border-2 border-black"
+					className="py-2 px-4 mx-2 bg-yellow-400 rounded-md border-2 border-black"
 				>
 					Jump
 				</button>
 				<button className="py-2 px-4 mx-2 bg-green-400 rounded-md border-2 border-black">
 					Edit
 				</button>
-				<button className="py-2 px-4 bg-red-400 rounded-md border-2 border-black">
+				<button
+					className="py-2 px-4 bg-red-400 rounded-md border-2 border-black"
+					onClick={onDeleteClick}
+				>
 					Delete
 				</button>
 			</div>

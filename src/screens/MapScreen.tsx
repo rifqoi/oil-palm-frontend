@@ -25,13 +25,16 @@ import L, {
 	LatLngBounds,
 	LatLngExpression,
 	LatLngBoundsLiteral,
+	DrawEvents,
 } from "leaflet"
 import { Popup } from "react-leaflet"
-import { getTreesHistory, predictImage } from "../libs/api"
+import { deleteTree, getTreesHistory, predictImage } from "../libs/api"
 import Boxes from "../components/Boxes"
 import SidebarTreeLocations from "../components/SidebarTreeLocations"
 import SidebarPredictedTree from "../components/SidebarPredictedTree"
 import { Polygon } from "react-leaflet"
+import { EditControl } from "react-leaflet-draw"
+import TreeCard from "../components/TreeCard"
 
 const getAddressData = async (
 	address: string | undefined
@@ -239,12 +242,41 @@ const MapScreen = () => {
 		}
 
 		getTreesHistory().then((tree) => {
-			console.log(tree)
 			setTrees(tree)
 			setLoadTrees(true)
-			console.log(trees)
 		})
 	}
+
+	const [deleteTreeID, setDeleteTreeID] = useState<number | null>(null)
+	const onDeleteFunction = (id: number) => {
+		deleteTree(id).then((response) => {
+			console.log(response)
+			if (!response.ok) {
+				console.log(response.json())
+				return
+			}
+
+			const treeToDelete = trees?.findIndex(
+				(tree) => tree.tree_id === id
+			) as number
+			console.log("treeToDel", treeToDelete)
+			if (trees) {
+				const newTrees = [...trees]
+				newTrees.splice(treeToDelete, 1)
+				setTrees(newTrees)
+				rectRefs?.current?.delete(id)
+				console.log(newTrees)
+			}
+		})
+	}
+
+	useEffect(() => {
+		if (deleteTreeID) {
+			onDeleteFunction(deleteTreeID)
+			const myRect = rectRefs?.current?.get(deleteTreeID)
+			myRect?.closePopup()
+		}
+	}, [deleteTreeID])
 
 	return (
 		<>
@@ -298,6 +330,8 @@ const MapScreen = () => {
 									mapRef={mapRef}
 									onPrevious={onPrevious}
 									trees={trees}
+									setTrees={setTrees}
+									setDeleteTreeID={setDeleteTreeID}
 								/>
 							) : null}
 							{sbTreeLocations && popupRefs && rectRefs ? (
@@ -307,7 +341,12 @@ const MapScreen = () => {
 									popupRef={popupRefs}
 									rectRef={rectRefs}
 									trees={trees}
+									setTrees={setTrees}
+									setDeleteTreeID={setDeleteTreeID}
 								/>
+							) : null}
+							{trees?.length === 0 && sbTreeLocations ? (
+								<div>There are no predicted trees</div>
 							) : null}
 						</SidebarEmpty>
 						{/* <div className="items-start">asdasd</div> */}
@@ -364,6 +403,8 @@ const MapScreen = () => {
 							rectRefs={rectRefs}
 							popupRefs={popupRefs}
 							trees={trees}
+							setTrees={setTrees}
+							setDeleteTreeID={setDeleteTreeID}
 						/>
 					) : null}
 				</MapContainer>

@@ -11,10 +11,20 @@ import TreeCard from "./TreeCard"
 const SidebarPredictedTree: FC<{
 	onPrevious: ReactEventHandler<HTMLDivElement>
 	mapRef: RefObject<L.Map>
-	rectRef: MutableRefObject<Map<number, L.Rectangle> | null>
-	popupRef: MutableRefObject<Map<number, L.Popup> | null>
+	rectRef?: MutableRefObject<Map<number, L.Rectangle> | null>
+	popupRef?: MutableRefObject<Map<number, L.Popup> | null>
 	trees: Tree[] | null
-}> = ({ onPrevious, trees, mapRef, rectRef, popupRef }) => {
+	setTrees: React.Dispatch<React.SetStateAction<Tree[] | null>>
+	setDeleteTreeID: React.Dispatch<React.SetStateAction<number | null>>
+}> = ({
+	onPrevious,
+	trees,
+	mapRef,
+	rectRef,
+	popupRef,
+	setTrees,
+	setDeleteTreeID,
+}) => {
 	return (
 		<>
 			<SidebarStickyPrevious
@@ -27,6 +37,7 @@ const SidebarPredictedTree: FC<{
 					return (
 						<TreeCard
 							key={"tree" + tree.id}
+							confidence={tree.confidence}
 							rectRef={rectRef}
 							mapRef={mapRef}
 							popupRef={popupRef}
@@ -34,6 +45,7 @@ const SidebarPredictedTree: FC<{
 							long={tree.long}
 							lat={tree.lat}
 							predicted_at={tree.created_at}
+							setDeleteTreeID={setDeleteTreeID}
 						/>
 					)
 				})}
