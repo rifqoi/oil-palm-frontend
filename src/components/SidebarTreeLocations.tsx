@@ -16,7 +16,16 @@ const SidebarTreeLocations: FC<{
 	popupRef: MutableRefObject<Map<number, L.Popup> | null>
 	trees: Tree[] | null
 	setDeleteTreeID: React.Dispatch<React.SetStateAction<number | null>>
-}> = ({ onPrevious, mapRef, rectRef, popupRef, setDeleteTreeID, trees }) => {
+	setEditTreeID: React.Dispatch<React.SetStateAction<number | null>>
+}> = ({
+	onPrevious,
+	mapRef,
+	rectRef,
+	popupRef,
+	trees,
+	setDeleteTreeID,
+	setEditTreeID,
+}) => {
 	return (
 		<>
 			<SidebarStickyPrevious
@@ -39,6 +48,7 @@ const SidebarTreeLocations: FC<{
 							lat={tree.lat}
 							predicted_at={tree.created_at}
 							setDeleteTreeID={setDeleteTreeID}
+							setEditTreeID={setEditTreeID}
 						/>
 					)
 				})}

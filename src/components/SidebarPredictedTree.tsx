@@ -14,16 +14,16 @@ const SidebarPredictedTree: FC<{
 	rectRef?: MutableRefObject<Map<number, L.Rectangle> | null>
 	popupRef?: MutableRefObject<Map<number, L.Popup> | null>
 	trees: Tree[] | null
-	setTrees: React.Dispatch<React.SetStateAction<Tree[] | null>>
 	setDeleteTreeID: React.Dispatch<React.SetStateAction<number | null>>
+	setEditTreeID: React.Dispatch<React.SetStateAction<number | null>>
 }> = ({
 	onPrevious,
 	trees,
 	mapRef,
 	rectRef,
 	popupRef,
-	setTrees,
 	setDeleteTreeID,
+	setEditTreeID,
 }) => {
 	return (
 		<>
@@ -46,6 +46,7 @@ const SidebarPredictedTree: FC<{
 							lat={tree.lat}
 							predicted_at={tree.created_at}
 							setDeleteTreeID={setDeleteTreeID}
+							setEditTreeID={setEditTreeID}
 						/>
 					)
 				})}

@@ -13,7 +13,9 @@ const SidebarMain: FC<{
 			<div className={className ? `${className}` : ""}>
 				<div className="group text-xl" onClick={onPredictTree}>
 					<div className="flex cursor-pointer py-3 justify-between items-center">
-						<div className="group-hover:text-brightRedLight">Predict Tree</div>
+						<div className="group-hover:text-brightRedLight">
+							Predict Tree
+						</div>
 						<AiOutlineArrowRight className="group-hover:text-brightRedLight" />
 					</div>
 					<hr className="" />

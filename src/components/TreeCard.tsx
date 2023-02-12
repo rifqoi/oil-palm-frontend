@@ -13,6 +13,7 @@ const TreeCard: FC<{
 	rectRef?: MutableRefObject<Map<number, L.Rectangle> | null>
 	popupRef?: MutableRefObject<Map<number, L.Popup> | null>
 	setDeleteTreeID: React.Dispatch<React.SetStateAction<number | null>>
+	setEditTreeID: React.Dispatch<React.SetStateAction<number | null>>
 }> = ({
 	confidence,
 	lat,
@@ -22,6 +23,7 @@ const TreeCard: FC<{
 	rectRef,
 	mapRef,
 	setDeleteTreeID,
+	setEditTreeID,
 }) => {
 	const flyToBox = (e: SyntheticEvent) => {
 		const myRect = rectRef?.current?.get(id)
@@ -42,9 +44,11 @@ const TreeCard: FC<{
 	}
 
 	const onDeleteClick = (e: SyntheticEvent) => {
-		const myRect = rectRef?.current?.get(id)
-		myRect?.closePopup()
 		setDeleteTreeID(id)
+	}
+
+	const onEditClick = (e: SyntheticEvent) => {
+		setEditTreeID(id)
 	}
 
 	return (
@@ -80,7 +84,10 @@ const TreeCard: FC<{
 				>
 					Jump
 				</button>
-				<button className="py-2 px-4 mx-2 bg-green-400 rounded-md border-2 border-black">
+				<button
+					className="py-2 px-4 mx-2 bg-green-400 rounded-md border-2 border-black"
+					onClick={onEditClick}
+				>
 					Edit
 				</button>
 				<button

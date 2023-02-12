@@ -16,8 +16,6 @@ import { AiOutlineArrowLeft, AiOutlineArrowRight } from "react-icons/ai"
 import SearchMap from "../components/SearchMap"
 import { ZoomControl } from "react-leaflet"
 import SidebarPredictImage from "../components/SidebarPredictImage"
-import "leaflet-path-drag"
-import "leaflet-draw"
 
 import L, {
 	LeafletMouseEvent,
@@ -26,6 +24,8 @@ import L, {
 	LatLngExpression,
 	LatLngBoundsLiteral,
 	DrawEvents,
+	LayerEvent,
+	layerGroup,
 } from "leaflet"
 import { Popup } from "react-leaflet"
 import {
@@ -40,7 +40,8 @@ import SidebarPredictedTree from "../components/SidebarPredictedTree"
 import { Polygon } from "react-leaflet"
 import { EditControl } from "react-leaflet-draw"
 import TreeCard from "../components/TreeCard"
-import { Navigate } from "react-router-dom"
+import { Navigate, useNavigate } from "react-router-dom"
+import SidebarEditTree from "../components/SidebarEditTree"
 
 const getAddressData = async (
 	address: string | undefined
@@ -73,11 +74,6 @@ const getPolygonPointFromBounds = (latLngBounds: L.LatLngBounds) => {
 	return latlngs
 }
 
-type Transform = {
-	matrix: any
-	end: boolean
-}
-
 const MapScreen = () => {
 	const fgRef = useRef<L.FeatureGroup>(null)
 	const mapRef = useRef<L.Map>(null)
@@ -91,6 +87,7 @@ const MapScreen = () => {
 		useState<boolean>(false)
 	const [sbTreeLocations, setSBTreeLocations] = useState<boolean>(false)
 	const [sbMoveFromMain, setSBMoveFromMain] = useState<boolean>(false)
+	const [sbEditTree, setSBEditTree] = useState<boolean>(false)
 	const [locationFound, setLocationFound] = useState<boolean | null>(null)
 	const [rectangleMouse, setRectangleMouse] = useState<LatLngBounds | null>(
 		null
@@ -104,23 +101,12 @@ const MapScreen = () => {
 	const [trees, setTrees] = useState<Tree[] | null>(null)
 	const [loadTrees, setLoadTrees] = useState<boolean>(false)
 	const [editTreeID, setEditTreeID] = useState<number | null>(null)
+	const [editDeleteID, setEditDeleteID] = useState<number | null>(null)
+	const [editedTreeCenter, setEditedTreeCenter] = useState<LatLng>()
+	const editControlRef = useRef<any>()
 
-	checkUser().then((resp) => {
-		if (!resp.ok) {
-			return <Navigate to="/login" />
-		}
-	})
-
-	useEffect(() => {
-		if (mapRef.current) {
-			const map = mapRef.current
-
-			if (!mouseMoveEvent) {
-				setRectangleCenter(mouseRectRef.current?.getCenter())
-				map.off("mousemove")
-			}
-		}
-	}, [mouseMoveEvent, mapRef, mouseRectRef])
+	let exampleRect = useRef<L.Rectangle | null>(null)
+	const navigate = useNavigate()
 
 	const onPredictionHistory = (e: SyntheticEvent) => {
 		setSBMoveFromMain(true)
@@ -190,6 +176,7 @@ const MapScreen = () => {
 		setRectangleMouse(null)
 		setRectangleCenter(undefined)
 		setSBLoadTreeCard(false)
+		setSBEditTree(false)
 	}
 
 	const onSearch = async (e: SyntheticEvent) => {
@@ -282,6 +269,88 @@ const MapScreen = () => {
 		})
 	}
 
+	const onEditMounted = () => {
+		editControlRef.current.drawControl._toolbars.draw._modes.rectangle.handler.enable()
+	}
+
+	const onEditStop = (e: SyntheticEvent) => {
+		const id = editTreeID as number
+		const editingRect = rectRefs.current?.get(id)
+
+		rectRefs.current?.forEach((rect) => {
+			rect.bindPopup(popupRefs.current?.get(id))
+		})
+
+		//@ts-ignore
+		editingRect.editing.disable()
+		setEditedTreeCenter(editingRect?.getCenter())
+
+		setSBEditTree(false)
+		setSBLoadTreeCard(!sbLoadTreeCard)
+		setSBPredictTree(!sbLoadTreeCard)
+		setSBTreeLocations(!sbLoadTreeCard)
+	}
+
+	const onEditStart = (id: number) => {
+		const editingRect = rectRefs.current?.get(id)
+
+		rectRefs.current?.forEach((rect) => {
+			rect.unbindPopup()
+		})
+
+		console.log(editingRect)
+		//@ts-ignore
+		editingRect.editing.enable()
+	}
+
+	const drawSomething = (e: SyntheticEvent) => {
+		// setEditTree(true)
+		// exampleRect.current?.editing.enable()
+		// if (mapRef) {
+		// 	const map = mapRef.current as L.DrawMap
+		// 	const rect = new L.Draw.Rectangle(map, {
+		// 		//@ts-ignore
+		// 		showArea: false,
+		// 	})
+		// 	map.on(L.Draw.Event.CREATED, (e: LayerEvent) => {
+		// 		if (fgRef) {
+		// 			const drawnItems = fgRef.current?.getLayers()
+		// 			if (drawnItems) {
+		// 				if (drawnItems.length > 1) {
+		// 					drawnItems!.forEach((layer, index) => {
+		// 						if (index > 0) return
+		// 						fgRef.current?.removeLayer(layer)
+		// 					})
+		// 				}
+		// 			}
+		// 			const layer = e.layer as L.Rectangle
+		// 			const featureGroup = fgRef.current as L.LayerGroup
+		// 			layer.addTo(featureGroup)
+		// 		}
+		// 	})
+		// 	rect.enable()
+		// }
+		// const drawnItems = fgRef.current?.getLayers()
+	}
+	checkUser().then((resp) => {
+		if (!resp.ok) {
+			navigate("/login")
+		}
+	})
+
+	useEffect(() => {
+		if (editTreeID) {
+			setSBEditTree(true)
+			setSBLoadTreeCard(!sbLoadTreeCard)
+			setSBPredictTree(!sbLoadTreeCard)
+			setSBTreeLocations(!sbLoadTreeCard)
+
+			onEditStart(editTreeID)
+			const myRect = rectRefs?.current?.get(editTreeID)
+			myRect?.closePopup()
+		}
+	}, [editTreeID])
+
 	useEffect(() => {
 		if (deleteTreeID) {
 			onDeleteFunction(deleteTreeID)
@@ -290,6 +359,16 @@ const MapScreen = () => {
 		}
 	}, [deleteTreeID])
 
+	useEffect(() => {
+		if (mapRef.current) {
+			const map = mapRef.current
+
+			if (!mouseMoveEvent) {
+				setRectangleCenter(mouseRectRef.current?.getCenter())
+				map.off("mousemove")
+			}
+		}
+	}, [mouseMoveEvent, mapRef, mouseRectRef])
 	return (
 		<>
 			<div className="flex">
@@ -308,7 +387,6 @@ const MapScreen = () => {
 								alt=""
 							/>
 						)}
-						{/* <div className={`flex flex-col ${closeSidebar && "hidden"}`}> */}
 						<SidebarEmpty
 							className={`py-5 ${closeSidebar ? "hidden" : ""}`}
 						>
@@ -342,8 +420,8 @@ const MapScreen = () => {
 									mapRef={mapRef}
 									onPrevious={onPrevious}
 									trees={trees}
-									setTrees={setTrees}
 									setDeleteTreeID={setDeleteTreeID}
+									setEditTreeID={setEditTreeID}
 								/>
 							) : null}
 							{sbTreeLocations && popupRefs && rectRefs ? (
@@ -353,16 +431,20 @@ const MapScreen = () => {
 									popupRef={popupRefs}
 									rectRef={rectRefs}
 									trees={trees}
-									setTrees={setTrees}
 									setDeleteTreeID={setDeleteTreeID}
+									setEditTreeID={setEditTreeID}
+								/>
+							) : null}
+							{sbEditTree ? (
+								<SidebarEditTree
+									onEditStop={onEditStop}
+									onPrevious={onPrevious}
 								/>
 							) : null}
 							{trees?.length === 0 && sbTreeLocations ? (
 								<div>There are no predicted trees</div>
 							) : null}
 						</SidebarEmpty>
-						{/* <div className="items-start">asdasd</div> */}
-						{/* </div> */}
 					</div>
 				</div>
 				<div
@@ -384,14 +466,61 @@ const MapScreen = () => {
 					zoomControl={false}
 					center={[-6.471428154696355, 107.02629987019694]}
 					ref={mapRef}
+					crs={L.CRS.EPSG3857}
 					zoom={18}
 					className="w-full h-screen z-0 absolute"
 					maxZoom={21}
 					attributionControl={false}
 				>
+					<ZoomControl position="topright" />
 					<AttributionControl prefix={false} />
 					<FeatureGroup ref={fgRef}>
-						<ZoomControl position="topright" />
+						<EditControl
+							position="topleft"
+							draw={{
+								polyline: false,
+								circle: false,
+								polygon: false,
+								marker: true,
+								circlemarker: false,
+								rectangle: {
+									// Weird...
+									//@ts-ignore
+									showArea: false,
+								},
+							}}
+						/>
+						<Rectangle
+							ref={(props) => {
+								if (props) {
+									props.on("click", (e: any) => {
+										console.log(e)
+										const layer = e.target
+
+										console.log(layer.getCenter())
+									})
+									props.on(
+										L.Draw.Event.EDITSTART,
+										(e: LayerEvent) => {
+											const layer = e.layer as L.Rectangle
+											console.log(layer.getCenter())
+										}
+									)
+									props.on(
+										L.Draw.Event.EDITSTOP,
+										(e: LayerEvent) => {
+											const layer = e.layer as L.Rectangle
+											console.log(layer.getCenter())
+										}
+									)
+								}
+								exampleRect.current = props
+							}}
+							bounds={[
+								[-6.472634489929272, 107.02520310434704],
+								[-6.4727091130627175, 107.02527686509495],
+							]}
+						/>
 					</FeatureGroup>
 					)
 					<TileLayer
@@ -416,6 +545,7 @@ const MapScreen = () => {
 							popupRefs={popupRefs}
 							trees={trees}
 							setTrees={setTrees}
+							setEditTreeID={setEditTreeID}
 							setDeleteTreeID={setDeleteTreeID}
 						/>
 					) : null}
