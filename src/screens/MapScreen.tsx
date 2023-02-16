@@ -25,7 +25,6 @@ import L, {
 	LatLngBoundsLiteral,
 	DrawEvents,
 	LayerEvent,
-	layerGroup,
 } from "leaflet"
 import { Popup } from "react-leaflet"
 import {
@@ -106,7 +105,6 @@ const MapScreen = () => {
 	const editControlRef = useRef<any>()
 
 	let exampleRect = useRef<L.Rectangle | null>(null)
-	const navigate = useNavigate()
 
 	const onPredictionHistory = (e: SyntheticEvent) => {
 		setSBMoveFromMain(true)
@@ -130,7 +128,7 @@ const MapScreen = () => {
 		if (mapRef.current && sbMoveFromMain) {
 			mapRef.current.on("mousemove", (e: LeafletMouseEvent) => {
 				setMouseMoveEvent(true)
-				setRectangleMouse(e.latlng.toBounds(100))
+				setRectangleMouse(e.latlng.toBounds(99))
 			})
 			mapRef.current.on("click", (e: LeafletMouseEvent) => {
 				console.log("rectmouse", rectangleMouse)
@@ -287,8 +285,8 @@ const MapScreen = () => {
 
 		setSBEditTree(false)
 		setSBLoadTreeCard(!sbLoadTreeCard)
-		setSBPredictTree(!sbLoadTreeCard)
-		setSBTreeLocations(!sbLoadTreeCard)
+		setSBPredictTree(!setSBPredictTree)
+		setSBTreeLocations(!setSBTreeLocations)
 	}
 
 	const onEditStart = (id: number) => {
@@ -298,7 +296,6 @@ const MapScreen = () => {
 			rect.unbindPopup()
 		})
 
-		console.log(editingRect)
 		//@ts-ignore
 		editingRect.editing.enable()
 	}
@@ -332,22 +329,15 @@ const MapScreen = () => {
 		// }
 		// const drawnItems = fgRef.current?.getLayers()
 	}
-	checkUser().then((resp) => {
-		if (!resp.ok) {
-			navigate("/login")
-		}
-	})
 
 	useEffect(() => {
 		if (editTreeID) {
 			setSBEditTree(true)
-			setSBLoadTreeCard(!sbLoadTreeCard)
-			setSBPredictTree(!sbLoadTreeCard)
-			setSBTreeLocations(!sbLoadTreeCard)
+			setSBTreeLocations(!setSBTreeLocations)
 
-			onEditStart(editTreeID)
 			const myRect = rectRefs?.current?.get(editTreeID)
 			myRect?.closePopup()
+			onEditStart(editTreeID)
 		}
 	}, [editTreeID])
 
@@ -392,7 +382,8 @@ const MapScreen = () => {
 						>
 							{!sbPredictTree &&
 							!sbPredictionHistory &&
-							!sbTreeLocations ? (
+							!sbTreeLocations &&
+							!sbEditTree ? (
 								<SidebarMain
 									className="h-screen"
 									onPredictTree={onPredictTree}

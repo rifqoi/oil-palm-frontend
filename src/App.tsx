@@ -9,6 +9,7 @@ import MainScreen from "./screens/MainScreen"
 import NotFoundScreen from "./screens/NotFoundScreen"
 import RequireAuth from "./components/RequireAuth"
 import MapScreen from "./screens/MapScreen"
+import MapWithSidebar from "./screens/Map2"
 
 function App(): JSX.Element {
 	return (
@@ -21,8 +22,9 @@ function App(): JSX.Element {
 					{/* Proctected Route */}
 					<Route element={<RequireAuth />}>
 						<Route path="/map" element={<MainScreen />} />
+						<Route path="/test" element={<MapScreen />} />
 					</Route>
-					<Route path="/test" element={<MapScreen />} />
+					<Route path="/test2" element={<MapWithSidebar />} />
 					<Route path="*" element={<NotFoundScreen />} />
 				</Routes>
 			</Router>
