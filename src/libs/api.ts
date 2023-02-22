@@ -1,6 +1,8 @@
+// import useToken from "../hooks/useToken"
+import { LatLng } from "leaflet"
 import useToken from "../hooks/useToken"
-import { Prediction, Tree } from "../types/ApiCall"
-import { API_URL } from "./Config"
+import { Prediction, TotalTrees, Tree } from "../types/Tree"
+import { API_URL } from "./config"
 
 const getImage = async (lat: number, long: number) => {
 	// const url = "http://34.87.112.231:7546/api/v1/inference/image"
@@ -22,7 +24,7 @@ const getImage = async (lat: number, long: number) => {
 
 	return imageObjectURL
 }
-const predictImage = async (lat: number, long: number) => {
+const predictImage = async (lat: number, long: number, nw_bounds: LatLng, se_bounds: LatLng) => {
 	// const url = "http://34.87.112.231:7546/api/v1/inference/predict"
 	const url = `${API_URL}/api/v1/inference/predict`
 	const token = localStorage.getItem("access_token")
@@ -31,12 +33,15 @@ const predictImage = async (lat: number, long: number) => {
 		body: JSON.stringify({
 			lat: lat,
 			long: long,
+			nw_bounds: [nw_bounds.lat, nw_bounds.lng],
+			se_bounds: [se_bounds.lat, se_bounds.lng],
 		}),
 		headers: new Headers({
 			Authorization: `Bearer ${token}`,
 			"Content-Type": "application/json",
 		}),
 	})
+
 	const data: Prediction = await response.json()
 
 	return data
@@ -58,6 +63,38 @@ const getTreesHistory = async (): Promise<Tree[]> => {
 	return data
 }
 
+const getPredictionsHistory = async (): Promise<Prediction[]> => {
+	const url = `${API_URL}/api/v1/inference/predictions`
+	const token = localStorage.getItem("access_token")
+
+	const response = await fetch(url, {
+		method: "GET",
+		headers: new Headers({
+			Authorization: `Bearer ${token}`,
+			"Content-Type": "application/json",
+		}),
+	})
+
+	const data: Prediction[] = await response.json()
+	return data
+}
+
+const getTotalTrees = async (): Promise<TotalTrees> => {
+	const url = `${API_URL}/api/v1/inference/total-trees`
+	const token = localStorage.getItem("access_token")
+
+	const response = await fetch(url, {
+		method: "GET",
+		headers: new Headers({
+			Authorization: `Bearer ${token}`,
+			"Content-Type": "application/json",
+		}),
+	})
+
+	const data: TotalTrees = await response.json()
+	return data
+}
+
 const deleteTree = async (id: number): Promise<Response> => {
 	const url = `${API_URL}/api/v1/inference/trees/delete/${id}`
 	const token = localStorage.getItem("access_token")
@@ -69,7 +106,6 @@ const deleteTree = async (id: number): Promise<Response> => {
 			"Content-Type": "application/json",
 		}),
 	})
-	console.log(response.json())
 
 	return response
 }
@@ -89,4 +125,4 @@ async function checkUser() {
 	return response
 }
 
-export { getImage, predictImage, getTreesHistory, deleteTree, checkUser }
+export { getImage, predictImage, getTreesHistory, deleteTree, checkUser, getPredictionsHistory, getTotalTrees, }
