@@ -11,11 +11,14 @@ type PredictionResultProps = {
 };
 
 const PredictionResult: React.FC<PredictionResultProps> = () => {
-  const { trees, setTotalTrees, totalTrees } = useContext(
+  const { trees, setTotalTrees, totalTrees, predictedTrees } = useContext(
     MapContext
   ) as MapContextProps;
 
-  const predictedTrees = trees?.length;
+  // const predictedTrees = trees?.length;
+  // console.log(trees);
+
+  const totalPredictedTrees = predictedTrees?.length;
 
   useEffect(() => {
     getTotalTrees().then((data) => {
@@ -28,7 +31,7 @@ const PredictionResult: React.FC<PredictionResultProps> = () => {
       <StickyHeaderPrevious path="/" titleHeader="Previous" />
       <StatsCard
         title="Total pohon yang diprediksi"
-        value={predictedTrees}
+        value={totalPredictedTrees}
         className="mt-5 ml-8"
       />
 

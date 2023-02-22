@@ -18,7 +18,7 @@ const MapRoutes = () => {
   return (
     <Routes>
       <Route element={<RequireAuth />}>
-        <Route path="/" element={<MapPage />}>
+        <Route element={<MapPage />}>
           <Route
             path="/"
             element={

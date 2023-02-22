@@ -26,26 +26,30 @@ const HistoryPredictions: React.FC<HistoryPredictionsProps> = ({}) => {
             return (
               <div
                 // onClick={onClick}
-                className={`rounded-r-xl bg-slate-600 py-5 px-5 w-3/4 mx-10 my-2
+                className={`rounded-r-xl bg-slate-600 py-5 px-5 w-[80%] mx-10 my-2
       cursor-pointer border-t-2 border-r-2 border-red-400 hover:bg-slate-800 `}
               >
                 <div className="ml-5 text-2xl text-left text-gray-200 opacity-70 underline underline-offset-8">
-                  Prediksi
+                  Prediksi {pred.prediction_id}
                 </div>
                 <div className="my-5 mx-5 text-gray-300 text-lg">
                   <table>
                     <tbody>
                       <tr>
                         <td className="w-1/2">Predicted at</td>
-                        <td className="">: 10 Februari 2022</td>
+                        <td className="">{pred.created_at}</td>
                       </tr>
                       <tr>
                         <td className="w-1/2">Latitude</td>
-                        <td>: -6.123123123312</td>
+                        <td>
+                          : {pred.center_coords ? pred.center_coords[0] : null}
+                        </td>
                       </tr>
                       <tr>
                         <td className="w-1/2">Longitude</td>
-                        <td>: 17.123123123</td>
+                        <td>
+                          : {pred.center_coords ? pred.center_coords[1] : null}
+                        </td>
                       </tr>
                     </tbody>
                   </table>

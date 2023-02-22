@@ -13,8 +13,6 @@ import LeafletMap from "../components/Map/LeafletMap";
 
 import { AiOutlineArrowLeft, AiOutlineArrowRight } from "react-icons/ai";
 import { Prediction, Tree } from "../types/Tree";
-import { DraggableData, DraggableEvent } from "react-draggable";
-// import useBreakpoints from "../hooks/useBreakpoints";
 import {
   Navigate,
   Outlet,
@@ -22,7 +20,6 @@ import {
   Routes,
   useLocation,
   useNavigate,
-  useOutletContext,
 } from "react-router-dom";
 import PredictionResult from "../components/Sidebar/PredictionResult";
 import HistoryPredictionsID from "../components/Sidebar/HistoryPredictionsID";
@@ -31,7 +28,12 @@ import FloatingButton from "../components/Map/FloatingButton";
 import HistoryPredictions from "../components/Sidebar/HistoryPredictions";
 import SidebarMain from "../components/Sidebar/SidebarMain";
 import PredictedTrees from "../components/Sidebar/PredictedTrees";
-import { deleteTree, getTreesHistory, predictImage } from "../libs/api";
+import {
+  deleteTree,
+  getTreesHistory,
+  predictImage,
+  getPredictionsHistory,
+} from "../libs/api";
 import useToken from "../hooks/useToken";
 import TreeBoxes from "../components/Map/TreeBoxes";
 import { MdNewLabel } from "react-icons/md";
@@ -66,8 +68,12 @@ const MapPage = () => {
   const [showPredictedTree, setShowPredictedTree] = useState<boolean>(false);
   const [mapLoading, setMapLoading] = useState<boolean>(false);
   const [trees, setTrees] = useState<Tree[] | null>(null);
+  const [allTrees, setAllTrees] = useState<Tree[] | null>(null);
+  const [predictedTrees, setPredictedTrees] = useState<Tree[] | null>(null);
+
   const [totalTrees, setTotalTrees] = useState<number>();
   const rectRefs = useRef<Map<number, L.Rectangle> | null>(null);
+  const predictedRectRefs = useRef<Map<number, L.Rectangle> | null>(null);
 
   // Rectangle untuk predict
   const [rectangleMouse, setRectangleMouse] = useState<LatLngBounds | null>(
@@ -90,6 +96,7 @@ const MapPage = () => {
   const [drawTree, setDrawTree] = useState<boolean>(false);
 
   const [showTrees, setShowTrees] = useState<boolean>(false);
+  const [showPredictedTrees, setShowPredictedTrees] = useState<boolean>(false);
 
   // Edit box tree
   const [editTreeID, setEditTreeID] = useState<number | null>(null);
@@ -126,7 +133,6 @@ const MapPage = () => {
   const drawSomething = (e: SyntheticEvent) => {
     e.preventDefault();
     if (mapRef.current) {
-      console.log("asd");
       const map = mapRef.current as L.DrawMap;
 
       const rect = new L.Draw.Rectangle(map, {
@@ -167,10 +173,14 @@ const MapPage = () => {
       setShowPredictedTree(true);
 
       setMapLoading(true);
-      setTimeout(() => {
-        setMapLoading(false);
-        setShowTrees(true);
-      }, 1000);
+      getTreesHistory().then((tree) => {
+        setAllTrees(tree);
+        setTrees(allTrees);
+        setTotalTrees(tree?.length);
+      });
+
+      setMapLoading(false);
+      setShowTrees(true);
     } else if (showPredictedTree === true) {
       setMapLoading(true);
       setShowPredictedTree(false);
@@ -203,6 +213,7 @@ const MapPage = () => {
 
   const [predicted, setPredicted] = useState<boolean>(false);
   const [prediction, setPrediction] = useState<Prediction | undefined>();
+  const [predictions, setPredictions] = useState<Prediction[] | undefined>();
 
   const onPredictConfirmed = async (e: SyntheticEvent) => {
     e.preventDefault();
@@ -228,11 +239,17 @@ const MapPage = () => {
         setPrediction(data);
         setPredicted(true);
 
-        navigate("/predict");
-        setTrees(data.trees);
+        if (allTrees) {
+          // Append predicted trees to trees state
+          const new_trees = [...allTrees, ...data.trees];
+          setAllTrees(new_trees);
+          setPredictedTrees(data.trees);
+          setTrees(data.trees);
+        }
         setShowTrees(true);
         setMapLoading(false);
         setPredictPopup(undefined);
+        navigate("/predict");
       })
       .then(() => {
         setCloseSidebar(false);
@@ -246,11 +263,11 @@ const MapPage = () => {
     // setRectangleCenter(undefined);
   };
 
-  const onStopShowMore = (e: DraggableEvent, data: DraggableData) => {
-    if (data.y < -100) {
-      alert("Test");
-    }
-  };
+  // const onStopShowMore = (e: DraggableEvent, data: DraggableData) => {
+  //   if (data.y < -100) {
+  //     alert("Test");
+  //   }
+  // };
 
   // const []
   const onPredictCanceled = (e: SyntheticEvent) => {
@@ -284,20 +301,35 @@ const MapPage = () => {
 
   useEffect(() => {
     getTreesHistory().then((tree) => {
-      console.log("tree", tree);
+      setAllTrees(tree);
       setTrees(tree);
-      setTotalTrees(tree.length);
+      console.log(trees);
+      setTotalTrees(tree?.length);
     });
   }, []);
 
   useEffect(() => {
+    getPredictionsHistory().then((preds) => {
+      setPredictions(preds);
+    });
+  }, []);
+
+  const location = useLocation();
+  const [isPredictionsRoute, setIsPredictionsRoute] = useState(false);
+  useEffect(() => {
     if (deleteTreeID) {
       console.log("useeffect deletetree", deleteTreeID);
       onDeleteFunction(deleteTreeID);
+      console.log("rectLength", rectRefs.current?.size);
       const myRect = rectRefs?.current?.get(deleteTreeID);
       myRect?.closePopup();
     }
   }, [deleteTreeID]);
+
+  useEffect(() => {
+    const permittedLocations = ["/", "/predict"];
+    setIsPredictionsRoute(permittedLocations.includes(location.pathname));
+  }, [location]);
 
   return (
     <>
@@ -306,6 +338,7 @@ const MapPage = () => {
           totalTrees: totalTrees,
           trees: trees,
           setTotalTrees: setTotalTrees,
+          predictedTrees: predictedTrees,
         }}
       >
         <div className="flex">
@@ -377,6 +410,33 @@ const MapPage = () => {
             <div className="absolute top-0 left-0 bottom-0 right-0 z-10 opacity-50 bg-black cursor-wait"></div>
           ) : null}
           <LeafletMap mapRef={mapRef}>
+            {predictions && predicted
+              ? predictions.map((pred) => {
+                  if (!pred.nw_bounds && !pred.se_bounds) return;
+                  return (
+                    <Rectangle
+                      color="green"
+                      bounds={
+                        [
+                          pred.nw_bounds,
+                          pred.se_bounds,
+                        ] as L.LatLngBoundsExpression
+                      }
+                    />
+                  );
+                })
+              : null}
+            {predicted && prediction ? (
+              <Rectangle
+                color="red"
+                bounds={
+                  [
+                    prediction.nw_bounds,
+                    prediction.se_bounds,
+                  ] as L.LatLngBoundsExpression
+                }
+              />
+            ) : null}
             {trees && showTrees ? (
               <TreeBoxes
                 rectRefs={rectRefs}
@@ -385,6 +445,15 @@ const MapPage = () => {
                 trees={trees}
               />
             ) : null}
+            {/* {predictedTrees && showPredictedTrees ? (
+              <TreeBoxes
+                rectRefs={rectRefs}
+                setDeleteTreeID={setDeleteTreeID}
+                setEditTreeID={setEditTreeID}
+                trees={predictedTrees}
+              />
+            ) : null} */}
+
             {rectangleMouse ? (
               <Rectangle ref={mouseRectRef} bounds={rectangleMouse}>
                 {rectangleCenter ? (
@@ -437,6 +506,7 @@ export default MapPage;
 export type MapContextProps = {
   totalTrees: number | undefined;
   trees: Tree[] | null;
+  predictedTrees: Tree[] | null;
   setTotalTrees: React.Dispatch<React.SetStateAction<number | undefined>>;
 };
 

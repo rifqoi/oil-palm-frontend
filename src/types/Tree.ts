@@ -11,7 +11,10 @@ export type Tree = {
 }
 
 export interface Prediction {
+	id: number
 	user_id: number
+	prediction_id: number
+	center_coords: number[]
 	image_url: string
 	coco_bbox: number[][]
 	yolo_bbox: number[][]
@@ -20,6 +23,7 @@ export interface Prediction {
 	confidence: number[]
 	count: number
 	trees: Tree[]
+	created_at: string
 }
 
 export type TotalTrees = {

@@ -10,7 +10,7 @@ import useBreakpoints from "../../hooks/useBreakpoints";
 
 type LeafletMapProps = {
   mapRef: React.MutableRefObject<L.Map | null>;
-  children?: React.ReactNode;
+  children?: React.ReactNode | React.ReactNode[];
 };
 
 const LeafletMap: React.FC<LeafletMapProps> = ({ mapRef, children }) => {
