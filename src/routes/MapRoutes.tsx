@@ -7,11 +7,8 @@ import HistoryPredictionsID from "../components/Sidebar/HistoryPredictionsID";
 import PredictedTrees from "../components/Sidebar/PredictedTrees";
 import PredictionResult from "../components/Sidebar/PredictionResult";
 import SidebarMain from "../components/Sidebar/SidebarMain";
-import useToken from "../hooks/useToken";
 import LoginScreen from "../pages/Login";
 import MapPage from "../pages/MapPage";
-import { checkUser } from "../libs/api";
-import { User } from "../types/User";
 import SignUpScreen from "../pages/SignUp";
 
 const MapRoutes = () => {
