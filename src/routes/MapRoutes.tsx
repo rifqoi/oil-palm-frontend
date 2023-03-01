@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import RequireAuth from "../components/Auth/RequireAuth";
+import Logout from "../components/Auth/Logout";
 import HistoryPredictions from "../components/Sidebar/HistoryPredictions";
 import HistoryPredictionsID from "../components/Sidebar/HistoryPredictionsID";
 import PredictedTrees from "../components/Sidebar/PredictedTrees";
@@ -9,14 +10,19 @@ import SidebarMain from "../components/Sidebar/SidebarMain";
 import useToken from "../hooks/useToken";
 import LoginScreen from "../pages/Login";
 import MapPage from "../pages/MapPage";
+import { checkUser } from "../libs/api";
+import { User } from "../types/User";
+import SignUpScreen from "../pages/SignUp";
 
 const MapRoutes = () => {
-  const [token, setToken] = useToken();
   const [profileDropdownOpen, setProfileDropdownOpen] =
     useState<boolean>(false);
 
   return (
     <Routes>
+      <Route path="/login" element={<LoginScreen />} />
+      <Route path="/signup" element={<SignUpScreen />} />
+      <Route path="/logout" element={<Logout />} />
       <Route element={<RequireAuth />}>
         <Route element={<MapPage />}>
           <Route
@@ -65,14 +71,6 @@ const MapRoutes = () => {
           />
         </Route>
       </Route>
-      {token ? (
-        <Route path="/login" element={<Navigate to="/" />} />
-      ) : (
-        <>
-          <Route path="/login" element={<LoginScreen />} />
-          <Route path="*" element={<Navigate to="/login" />} />
-        </>
-      )}
     </Routes>
   );
 };

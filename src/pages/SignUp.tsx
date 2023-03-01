@@ -1,6 +1,7 @@
 import React, { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import useToken from "../hooks/useToken";
 import { API_URL } from "../libs/config";
 
 interface FormData {
@@ -41,6 +42,11 @@ const SignUpScreen = () => {
   const navigate = useNavigate();
 
   const password = watch("password");
+  const [token, setToken] = useToken();
+
+  if (token) {
+    return <Navigate to="/" />;
+  }
 
   const onSubmit = async (data: FormData) => {
     signUp(data.name, data.username, data.password)
