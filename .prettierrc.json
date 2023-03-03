@@ -1,6 +1,7 @@
 {
-	"semi": true,
-	"proseWrap": "preserve",
-	"useTabs": false,
-	"tabWidth": 2
+  "semi": true,
+  "proseWrap": "preserve",
+  "useTabs": false,
+  "tabWidth": 2,
+  "plugins": ["prettier-plugin-organize-imports", "prettier-plugin-tailwindcss"]
 }

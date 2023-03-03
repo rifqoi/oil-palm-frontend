@@ -3,14 +3,14 @@
 @tailwind utilities;
 
 @layer base {
-	@font-face {
-		font-family: "Poppins";
-		src: url(./font/Poppins-Medium.ttf);
-	}
-	/* * { */
-	/* 	padding: 0; */
-	/* 	left: 0; */
-	/* 	box-sizing: border-box; */
-	/* 	font-family: "Poppins"; */
-	/* } */
+  @font-face {
+    font-family: "Poppins";
+    src: url(./font/Poppins-Medium.ttf);
+  }
+  /* * { */
+  /* 	padding: 0; */
+  /* 	left: 0; */
+  /* 	box-sizing: border-box; */
+  /* 	font-family: "Poppins"; */
+  /* } */
 }

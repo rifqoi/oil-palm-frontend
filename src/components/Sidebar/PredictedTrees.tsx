@@ -1,5 +1,4 @@
 import React, { useContext } from "react";
-import { getTreesHistory } from "../../libs/api";
 import { MapContext, MapContextProps } from "../../pages/MapPage";
 import { Tree } from "../../types/Tree";
 import StickyHeaderPrevious from "./StickyHeaderPrevious";
@@ -14,7 +13,7 @@ const PredictedTrees: React.FC<PredictedTreesProps> = ({}) => {
   return (
     <>
       <StickyHeaderPrevious path="/" titleHeader="Previous" />
-      <div className="flex flex-col w-full mt-5">
+      <div className="mt-5 flex w-full flex-col">
         {trees ? (
           trees.map((tree) => {
             return (
@@ -26,7 +25,7 @@ const PredictedTrees: React.FC<PredictedTreesProps> = ({}) => {
             );
           })
         ) : (
-          <h1 className="text-xl mx-auto my-5 text-gray-400">
+          <h1 className="mx-auto my-5 text-xl text-gray-400">
             There are no predicted trees...
           </h1>
         )}

@@ -1,9 +1,9 @@
-import React, { useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { API_URL } from "../libs/config";
-import useToken from "../hooks/useToken";
+import { Navigate, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import useToken from "../hooks/useToken";
+import { API_URL } from "../libs/config";
 
 type FormData = {
   username: string;
@@ -79,17 +79,17 @@ const LoginScreen = () => {
   return (
     <>
       <Navbar center={true}></Navbar>
-      <div className="min-h-screen flex flex-col my-20">
-        <div className="max-w-3xl w-full mx-auto mt-4 bg-gray-50 p-8  md:border rounded-md border-brightRed ">
+      <div className="my-20 flex min-h-screen flex-col">
+        <div className="mx-auto mt-4 w-full max-w-3xl rounded-md border-brightRed  bg-gray-50 p-8 md:border ">
           <form action="" className="space-y-6" onSubmit={onSubmit}>
             <div>
-              <div className="font-medium text-xl text-gray-800 py-5 ">
+              <div className="py-5 text-xl font-medium text-gray-800 ">
                 Please sign in to continue!
               </div>
               <label
-                className={`text-sm font-bold text-gray-400 block ${
+                className={`block text-sm font-bold text-gray-400 ${
                   errors.username
-                    ? "text-red-500 border-red-500"
+                    ? "border-red-500 text-red-500"
                     : "border-brightRedLight"
                 }`}
               >
@@ -98,9 +98,9 @@ const LoginScreen = () => {
               <input
                 type="text"
                 placeholder="Enter your email here..."
-                className={`w-full p-2 border  rounded mt-1 focus:outline-0 ${
+                className={`mt-1 w-full rounded  border p-2 focus:outline-0 ${
                   errors.username
-                    ? "text-red-500 border-red-500"
+                    ? "border-red-500 text-red-500"
                     : "border-brightRedLight"
                 }`}
                 {...register("username", {
@@ -115,16 +115,16 @@ const LoginScreen = () => {
                 })}
               />
               {errors.username && (
-                <p className="text-red-500 text-sm mt-2">
+                <p className="mt-2 text-sm text-red-500">
                   {errors.username.message}
                 </p>
               )}
             </div>
             <div>
               <label
-                className={`text-sm font-bold text-gray-400 block ${
+                className={`block text-sm font-bold text-gray-400 ${
                   errors.password
-                    ? "text-red-500 border-red-500"
+                    ? "border-red-500 text-red-500"
                     : "border-brightRedLight"
                 }`}
               >
@@ -133,9 +133,9 @@ const LoginScreen = () => {
               <input
                 type="password"
                 placeholder="Enter your password here..."
-                className={`w-full p-2 border border-brightRed rounded mt-1 focus:outline-0 ${
+                className={`mt-1 w-full rounded border border-brightRed p-2 focus:outline-0 ${
                   errors.password
-                    ? "text-red-500 border-red-500"
+                    ? "border-red-500 text-red-500"
                     : "border-brightRedLight"
                 }`}
                 {...register("password", {
@@ -154,12 +154,12 @@ const LoginScreen = () => {
                 })}
               />
               {errors.password && userFound !== false ? (
-                <p className="text-red-500 text-sm mt-2">
+                <p className="mt-2 text-sm text-red-500">
                   {errors.password.message}
                 </p>
               ) : null}
               {userFound === false ? (
-                <p className="text-red-500 text-sm mt-2">
+                <p className="mt-2 text-sm text-red-500">
                   Incorrect username or password!
                 </p>
               ) : null}
@@ -179,18 +179,18 @@ const LoginScreen = () => {
               {/* 	</label> */}
               {/* </div> */}
               <div>
-                <a href="#" className="font-medium text-md text-blue-500">
+                <a href="#" className="text-md font-medium text-blue-500">
                   Forgot password?
                 </a>
               </div>
             </div>
             <div>
-              <button className="w-full py-2 px-4 bg-brightRed hover:bg-brightRedLight rounded-sm text-white text-sm">
+              <button className="w-full rounded-sm bg-brightRed py-2 px-4 text-sm text-white hover:bg-brightRedLight">
                 Login
               </button>
             </div>
           </form>
-          <div className=" ml-2 text-md text-gray-600 mt-5">
+          <div className=" text-md ml-2 mt-5 text-gray-600">
             Don&apos;t have an account?
             <span>
               <a href="/signup" className="text-blue-500">

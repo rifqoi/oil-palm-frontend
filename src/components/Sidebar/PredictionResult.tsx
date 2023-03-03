@@ -22,6 +22,7 @@ const PredictionResult: React.FC<PredictionResultProps> = () => {
 
   useEffect(() => {
     getTotalTrees().then((data) => {
+      console.log("total", data);
       setTotalTrees(data.total_trees);
     });
   }, []);
@@ -35,8 +36,8 @@ const PredictionResult: React.FC<PredictionResultProps> = () => {
         className="mt-5 ml-8"
       />
 
-      <span className="mt-3 w-3/4 p-0.5 ml-5 bg-gray-200 "></span>
-      <div className="flex flex-col w-full mt-5">
+      <span className="mt-3 ml-5 w-3/4 bg-gray-200 p-0.5 "></span>
+      <div className="mt-5 flex w-full flex-col">
         {trees
           ? trees.map((tree) => {
               return (

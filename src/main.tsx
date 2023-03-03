@@ -6,8 +6,8 @@ import "./index.css";
 // Important to import !!!!!
 import "leaflet";
 import "leaflet-draw";
-import "leaflet/dist/leaflet.css";
 import "leaflet-draw/dist/leaflet.draw.css";
+import "leaflet/dist/leaflet.css";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>

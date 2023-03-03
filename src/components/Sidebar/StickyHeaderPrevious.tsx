@@ -14,13 +14,13 @@ const StickyHeaderPrevious: React.FC<StickyHeaderPreviousProps> = ({
   const navigate = useNavigate();
   return (
     <div
-      className="group z-30 bg-gray-700 sticky top-0 text-2xl w-full"
+      className="group sticky top-0 z-30 h-screen w-full bg-gray-700 text-2xl"
       onClick={() => {
         navigate(path);
       }}
     >
-      <div className="flex cursor-pointer items-center text-gray-400 ml-5 my-5">
-        <AiOutlineArrowLeft className="group-hover:text-brightRedLight mr-2" />
+      <div className="my-5 ml-5 flex cursor-pointer items-center text-gray-400">
+        <AiOutlineArrowLeft className="mr-2 group-hover:text-brightRedLight" />
         <div className="group-hover:text-brightRedLight">{titleHeader}</div>
       </div>
       <hr className="w-full" />

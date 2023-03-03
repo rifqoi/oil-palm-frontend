@@ -17,15 +17,15 @@ const ButtonCard: React.FC<ButtonCardProps> = ({ title, className, path }) => {
   return (
     <div
       onClick={onClick}
-      className={`rounded-r-xl bg-slate-600 py-5 px-5
-      cursor-pointer border-t-2 border-r-2 border-red-400 hover:bg-slate-800 ${
+      className={`cursor-pointer rounded-r-xl border-t-2 border-r-2
+      border-red-400 bg-slate-600 py-5 px-5 hover:bg-slate-800 ${
         className ? className : null
       }`}
     >
-      <div className="ml-5 text-lg text-right text-gray-200 opacity-70 underline underline-offset-8">
+      <div className="ml-5 text-right text-lg text-gray-200 underline underline-offset-8 opacity-70">
         {title}
       </div>
-      <div className="flex justify-end ml-5 text-3xl text-right text-gray-200 pt-3">
+      <div className="ml-5 flex justify-end pt-3 text-right text-3xl text-gray-200">
         <AiOutlineArrowRight className="text-right" />
       </div>
     </div>

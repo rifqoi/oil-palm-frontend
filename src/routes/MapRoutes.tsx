@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { Navigate, Route, Routes, useLocation } from "react-router-dom";
-import RequireAuth from "../components/Auth/RequireAuth";
+import { useState } from "react";
+import { Route, Routes } from "react-router-dom";
 import Logout from "../components/Auth/Logout";
+import RequireAuth from "../components/Auth/RequireAuth";
 import HistoryPredictions from "../components/Sidebar/HistoryPredictions";
 import HistoryPredictionsID from "../components/Sidebar/HistoryPredictionsID";
 import PredictedTrees from "../components/Sidebar/PredictedTrees";

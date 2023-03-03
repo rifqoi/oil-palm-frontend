@@ -12,12 +12,12 @@ const TreeCard: React.FC<TreeCardProps> = ({ id, latitude, longitude }) => {
   return (
     <>
       <div
-        className={`rounded-lg items-center bg-slate-400 my-1 w-[90%] mx-auto ${
+        className={`my-1 mx-auto w-[90%] items-center rounded-lg bg-slate-400 ${
           clickCard ? "overflow-auto" : null
         }`}
       >
         <div
-          className="flex w-full justify-between px-5 rounded-t-lg bg-slate-500 items-center cursor-pointer"
+          className="flex w-full cursor-pointer items-center justify-between rounded-t-lg bg-slate-500 px-5"
           onClick={() => {
             setClickCard(!clickCard);
           }}
@@ -27,7 +27,7 @@ const TreeCard: React.FC<TreeCardProps> = ({ id, latitude, longitude }) => {
         </div>
         {clickCard ? (
           <>
-            <table className="table-fixed text-md w-full my-3 text-left">
+            <table className="text-md my-3 w-full table-fixed text-left">
               <tbody className="mx-2">
                 <tr className="">
                   <td className="w-[40%] px-3 py-3">Latitude</td>
@@ -43,8 +43,8 @@ const TreeCard: React.FC<TreeCardProps> = ({ id, latitude, longitude }) => {
                 </tr>
               </tbody>
             </table>
-            <div className="flex justify-end mr-5 my-3 border-none cursor-pointer">
-              <div className="py-3 px-3 bg-green-300 rounded-md border-2 border-emerald-900 hover:bg-green-400">
+            <div className="my-3 mr-5 flex cursor-pointer justify-end border-none">
+              <div className="rounded-md border-2 border-emerald-900 bg-green-300 py-3 px-3 hover:bg-green-400">
                 Locate
               </div>
             </div>

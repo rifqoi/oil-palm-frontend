@@ -9,19 +9,19 @@ type NavbarProps = {
 const Navbar: React.FC<NavbarProps> = ({ center, login }) => {
   return (
     // Navbar
-    <nav className="relative container p-6 mx-auto">
+    <nav className="container relative mx-auto p-6">
       {/* Flex Container */}
       <div className="flex items-center justify-between">
         {/* Logo */}
         <div className="pt-2">
           <a href="/">
-            <img className="h-8 mr-3 sm:h-12" src={Logo} alt="" />
+            <img className="mr-3 h-8 sm:h-12" src={Logo} alt="" />
           </a>
         </div>
 
         {/* Menu Items */}
         {center && (
-          <div className="hidden md:flex md:items-center space-x-6">
+          <div className="hidden space-x-6 md:flex md:items-center">
             <a href="#" className="hover:text-darkGrayishBlue">
               Home
             </a>
@@ -36,7 +36,7 @@ const Navbar: React.FC<NavbarProps> = ({ center, login }) => {
         {/* Button */}
         {login && (
           <a
-            className="hidden md:block p-3 px-6 pt-2 text-white bg-brightRed rounded-full align-baseline hover:bg-brightRedLight"
+            className="hidden rounded-full bg-brightRed p-3 px-6 pt-2 align-baseline text-white hover:bg-brightRedLight md:block"
             href="/login"
           >
             Login

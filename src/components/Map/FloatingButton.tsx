@@ -18,7 +18,7 @@ const FloatingButton: React.FC<FloatingButtonProps> = ({
     <>
       <button
         //   className ? "bg-green-400" : "bg-white hover:bg-gray-300 "
-        className={`flex my-1 z-20 p-2 rounded-md items-center justify-center select-none ${
+        className={`z-20 my-1 flex select-none items-center justify-center rounded-md p-2 ${
           className ? className : "bg-white hover:bg-gray-300"
         }
         } ${mapLoading ? "hover:cursor-wait" : "hover:cursor-pointer"}`}

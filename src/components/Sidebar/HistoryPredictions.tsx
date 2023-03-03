@@ -20,19 +20,19 @@ const HistoryPredictions: React.FC<HistoryPredictionsProps> = ({}) => {
   return (
     <>
       <StickyHeaderPrevious path="/" titleHeader="Previous" />
-      <div className="flex flex-col w-full mt-2">
+      <div className="mt-2 flex w-full flex-col">
         {predictions ? (
           predictions.map((pred) => {
             return (
               <div
                 // onClick={onClick}
-                className={`rounded-r-xl bg-slate-600 py-5 px-5 w-[80%] mx-10 my-2
-      cursor-pointer border-t-2 border-r-2 border-red-400 hover:bg-slate-800 `}
+                className={`mx-10 my-2 w-[80%] cursor-pointer rounded-r-xl border-t-2 border-r-2
+      border-red-400 bg-slate-600 py-5 px-5 hover:bg-slate-800 `}
               >
-                <div className="ml-5 text-2xl text-left text-gray-200 opacity-70 underline underline-offset-8">
+                <div className="ml-5 text-left text-2xl text-gray-200 underline underline-offset-8 opacity-70">
                   Prediksi {pred.prediction_id}
                 </div>
-                <div className="my-5 mx-5 text-gray-300 text-lg">
+                <div className="my-5 mx-5 text-lg text-gray-300">
                   <table>
                     <tbody>
                       <tr>
@@ -54,7 +54,7 @@ const HistoryPredictions: React.FC<HistoryPredictionsProps> = ({}) => {
                     </tbody>
                   </table>
                 </div>
-                <div className="flex justify-end ml-5 text-2xl text-right text-gray-200 pt-3">
+                <div className="ml-5 flex justify-end pt-3 text-right text-2xl text-gray-200">
                   <AiOutlineArrowRight className="text-right" />
                 </div>
               </div>

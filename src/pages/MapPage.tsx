@@ -4,7 +4,6 @@ import { FeatureGroup, Popup, Rectangle } from "react-leaflet";
 import L, {
   LatLng,
   LatLngBounds,
-  LatLngBoundsLiteral,
   LatLngExpression,
   LayerEvent,
   LeafletMouseEvent,
@@ -12,33 +11,19 @@ import L, {
 import LeafletMap from "../components/Map/LeafletMap";
 
 import { AiOutlineArrowLeft, AiOutlineArrowRight } from "react-icons/ai";
-import { Prediction, Tree } from "../types/Tree";
-import {
-  Navigate,
-  Outlet,
-  Route,
-  Routes,
-  useLocation,
-  useNavigate,
-} from "react-router-dom";
-import PredictionResult from "../components/Sidebar/PredictionResult";
-import HistoryPredictionsID from "../components/Sidebar/HistoryPredictionsID";
-import PopupCard from "../components/Map/PopupCard";
+import { Outlet, useNavigate } from "react-router-dom";
 import FloatingButton from "../components/Map/FloatingButton";
-import HistoryPredictions from "../components/Sidebar/HistoryPredictions";
-import SidebarMain from "../components/Sidebar/SidebarMain";
-import PredictedTrees from "../components/Sidebar/PredictedTrees";
+import TreeBoxes from "../components/Map/TreeBoxes";
+import useToken from "../hooks/useToken";
 import {
+  checkUser,
   deleteTree,
+  getPredictionsHistory,
   getTreesHistory,
   predictImage,
-  getPredictionsHistory,
 } from "../libs/api";
-import useToken from "../hooks/useToken";
-import TreeBoxes from "../components/Map/TreeBoxes";
-import { MdNewLabel } from "react-icons/md";
-import RequireAuth from "../components/Auth/RequireAuth";
-import LoginScreen from "./Login";
+import { Prediction, Tree } from "../types/Tree";
+import { User } from "../types/User";
 
 const bounds = [
   [-6.470495720018312, 107.0268509108695],
@@ -49,6 +34,7 @@ const MapPage = () => {
   // Navigasi ke login kalo belum login
   const [token, setToken] = useToken();
   const navigate = useNavigate();
+  const [user, setUser] = useState<User>();
 
   // if (!token) {
   //   return (
@@ -91,8 +77,6 @@ const MapPage = () => {
 
   const [closeSidebar, setCloseSidebar] = useState<boolean>(true);
 
-  const [userDropdownOpen, setUserDropdownOpen] = useState<boolean>(false);
-
   const [drawTree, setDrawTree] = useState<boolean>(false);
 
   const [showTrees, setShowTrees] = useState<boolean>(false);
@@ -108,6 +92,9 @@ const MapPage = () => {
   // const { isXs } = useBreakpoints();
 
   const onSelectArea = (e: SyntheticEvent) => {
+    setShowTrees(false);
+    setPredicted(true);
+
     if (rectangleCenter) {
       setRectangleCenter(undefined);
     }
@@ -174,8 +161,7 @@ const MapPage = () => {
 
       setMapLoading(true);
       getTreesHistory().then((tree) => {
-        setAllTrees(tree);
-        setTrees(allTrees);
+        setTrees(tree);
         setTotalTrees(tree?.length);
       });
 
@@ -234,18 +220,19 @@ const MapPage = () => {
     const neBounds = predictRectangleBounds?.getNorthEast() as LatLng;
     const swBounds = predictRectangleBounds?.getSouthWest() as LatLng;
 
+    getPredictionsHistory().then((preds) => {
+      setPredictions(preds);
+    });
+
+    console.log(lat, long, neBounds, swBounds);
     predictImage(lat, long, neBounds, swBounds)
       .then((data) => {
+        console.log(data);
         setPrediction(data);
         setPredicted(true);
 
-        if (allTrees) {
-          // Append predicted trees to trees state
-          const new_trees = [...allTrees, ...data.trees];
-          setAllTrees(new_trees);
-          setPredictedTrees(data.trees);
-          setTrees(data.trees);
-        }
+        setTrees(data.trees);
+        setPredictedTrees(data.trees);
         setShowTrees(true);
         setMapLoading(false);
         setPredictPopup(undefined);
@@ -301,9 +288,7 @@ const MapPage = () => {
 
   useEffect(() => {
     getTreesHistory().then((tree) => {
-      setAllTrees(tree);
       setTrees(tree);
-      console.log(trees);
       setTotalTrees(tree?.length);
     });
   }, []);
@@ -314,22 +299,26 @@ const MapPage = () => {
     });
   }, []);
 
-  const location = useLocation();
-  const [isPredictionsRoute, setIsPredictionsRoute] = useState(false);
   useEffect(() => {
     if (deleteTreeID) {
-      console.log("useeffect deletetree", deleteTreeID);
       onDeleteFunction(deleteTreeID);
-      console.log("rectLength", rectRefs.current?.size);
       const myRect = rectRefs?.current?.get(deleteTreeID);
       myRect?.closePopup();
     }
   }, [deleteTreeID]);
 
   useEffect(() => {
-    const permittedLocations = ["/", "/predict"];
-    setIsPredictionsRoute(permittedLocations.includes(location.pathname));
-  }, [location]);
+    checkUser()
+      .then((resp) => {
+        if (!resp.ok) {
+          localStorage.removeItem("access_token");
+          navigate("/login");
+        }
+
+        return resp.json();
+      })
+      .then((userRsp: User) => setUser(userRsp));
+  }, []);
 
   return (
     <>
@@ -339,20 +328,21 @@ const MapPage = () => {
           trees: trees,
           setTotalTrees: setTotalTrees,
           predictedTrees: predictedTrees,
+          user: user,
         }}
       >
         <div className="flex">
           <div
-            className={`flex z-30 overflow-x-hidden h-screen bg-gray-700 ease-in-out duration-300 rounded-r-2xl ${
+            className={`z-30 flex h-screen overflow-x-hidden rounded-r-2xl bg-gray-700 duration-300 ease-in-out ${
               !closeSidebar ? "w-[41%]" : "w-0"
             }`}
           >
-            <div className="flex flex-col container items-start w-full">
+            <div className="container flex h-screen w-full flex-col items-start">
               <Outlet />
             </div>
           </div>
           <div
-            className="z-30 my-auto bg-gray-500 py-3 pl-2 pr-2 rounded-r-md cursor-pointer"
+            className="z-30 my-auto cursor-pointer rounded-r-md bg-gray-500 py-3 pl-2 pr-2"
             onClick={() => {
               setCloseSidebar(!closeSidebar);
             }}
@@ -364,7 +354,7 @@ const MapPage = () => {
             )}
           </div>
 
-          <div className="flex fixed bottom-0 right-0 z-20 mr-5 sm:mb-14 md:mb-10 mb-12 float-right flex-col">
+          <div className="fixed bottom-0 right-0 z-20 float-right mr-5 mb-12 flex flex-col sm:mb-14 md:mb-10">
             <FloatingButton onClick={drawSomething} text="Add Tree" />
             <FloatingButton text="Predict Image" onClick={onSelectArea} />
             <FloatingButton
@@ -407,7 +397,7 @@ const MapPage = () => {
           {/* </Draggable> */}
 
           {mapLoading ? (
-            <div className="absolute top-0 left-0 bottom-0 right-0 z-10 opacity-50 bg-black cursor-wait"></div>
+            <div className="absolute top-0 left-0 bottom-0 right-0 z-10 cursor-wait bg-black opacity-50"></div>
           ) : null}
           <LeafletMap mapRef={mapRef}>
             {predictions && predicted
@@ -445,14 +435,6 @@ const MapPage = () => {
                 trees={trees}
               />
             ) : null}
-            {/* {predictedTrees && showPredictedTrees ? (
-              <TreeBoxes
-                rectRefs={rectRefs}
-                setDeleteTreeID={setDeleteTreeID}
-                setEditTreeID={setEditTreeID}
-                trees={predictedTrees}
-              />
-            ) : null} */}
 
             {rectangleMouse ? (
               <Rectangle ref={mouseRectRef} bounds={rectangleMouse}>
@@ -474,18 +456,18 @@ const MapPage = () => {
                 position={predictPopup}
               >
                 <div>
-                  <div className="w-full rounded-md text-xl my-2 ml-1 mr-3">
+                  <div className="my-2 ml-1 mr-3 w-full rounded-md text-xl">
                     Are you sure?
                   </div>
-                  <div className="flex justify-end py-2 px-2 relative">
+                  <div className="relative flex justify-end py-2 px-2">
                     <button
-                      className="py-2 px-4 mx-2 bg-green-400 rounded-md border-2 border-black"
+                      className="mx-2 rounded-md border-2 border-black bg-green-400 py-2 px-4"
                       onClick={onPredictConfirmed}
                     >
                       Yes
                     </button>
                     <button
-                      className="py-2 px-4 bg-red-400 rounded-md border-2 border-black"
+                      className="rounded-md border-2 border-black bg-red-400 py-2 px-4"
                       onClick={onPredictCanceled}
                     >
                       No
@@ -506,6 +488,7 @@ export default MapPage;
 export type MapContextProps = {
   totalTrees: number | undefined;
   trees: Tree[] | null;
+  user: User | undefined;
   predictedTrees: Tree[] | null;
   setTotalTrees: React.Dispatch<React.SetStateAction<number | undefined>>;
 };

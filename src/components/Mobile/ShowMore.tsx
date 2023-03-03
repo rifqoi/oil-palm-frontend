@@ -20,12 +20,12 @@ const ShowMore: React.FC<ShowMoreProps> = ({ onStop }) => {
       }}
       grid={[25, 25]}
     >
-      <div className="flex fixed bottom-0 z-30 bg-white h-11 w-full items-center justify-start">
-        <div className="flex justify-center items-center ml-3 text-gray-500">
+      <div className="fixed bottom-0 z-30 flex h-11 w-full items-center justify-start bg-white">
+        <div className="ml-3 flex items-center justify-center text-gray-500">
           <MdOutlineKeyboardArrowUp className="mr-2" />
           <span className="">Tap to show more</span>
         </div>
-        <div className="h-screen bg-white absolute top-10 w-screen"></div>
+        <div className="absolute top-10 h-screen w-screen bg-white"></div>
       </div>
     </Draggable>
   );

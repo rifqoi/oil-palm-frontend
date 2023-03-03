@@ -9,14 +9,14 @@ type StatsCardProps = {
 const StatsCard: React.FC<StatsCardProps> = ({ title, value, className }) => {
   return (
     <div
-      className={`rounded-r-xl bg-slate-600 py-5 px-5 border-t-2 border-r-2 border-sky-400 ${
+      className={`rounded-r-xl border-t-2 border-r-2 border-sky-400 bg-slate-600 py-5 px-5 ${
         className ? className : null
       }`}
     >
-      <div className="ml-5 text-lg text-right text-gray-200 opacity-70 underline underline-offset-8">
+      <div className="ml-5 text-right text-lg text-gray-200 underline underline-offset-8 opacity-70">
         {title}
       </div>
-      <div className="ml-5 text-3xl text-right text-gray-200 pt-3">{value}</div>
+      <div className="ml-5 pt-3 text-right text-3xl text-gray-200">{value}</div>
     </div>
   );
 };

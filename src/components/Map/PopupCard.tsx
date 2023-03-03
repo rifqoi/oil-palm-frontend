@@ -21,8 +21,8 @@ const PopupCard: React.FC<PopupCardProps> = ({
   };
   return (
     <>
-      <div className="w-full rounded-md text-md my-2 ml-1 mr-3">
-        <table className="table-auto mt-2">
+      <div className="text-md my-2 ml-1 mr-3 w-full rounded-md">
+        <table className="mt-2 table-auto">
           <tbody>
             <tr>
               <td>ID</td>
@@ -46,16 +46,16 @@ const PopupCard: React.FC<PopupCardProps> = ({
             </tr>
           </tbody>
         </table>
-        <hr className="w-full my-2 text-2xl bg-red-500" />
-        <div className="flex justify-end py-2 px-2 relative">
+        <hr className="my-2 w-full bg-red-500 text-2xl" />
+        <div className="relative flex justify-end py-2 px-2">
           <button
-            className="py-2 px-4 mx-2 bg-green-400 rounded-md border-2 border-black"
+            className="mx-2 rounded-md border-2 border-black bg-green-400 py-2 px-4"
             onClick={onEditClick}
           >
             Edit
           </button>
           <button
-            className="py-2 px-4 bg-red-400 rounded-md border-2 border-black"
+            className="rounded-md border-2 border-black bg-red-400 py-2 px-4"
             onClick={onDeleteClick}
           >
             Delete

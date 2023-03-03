@@ -2,5 +2,5 @@
 .leaflet-control,
 .leaflet-pane,
 .leaflet-top {
-	z-index: 0 !important;
+  z-index: 0 !important;
 }

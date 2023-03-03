@@ -1,3 +1,4 @@
+import L from "leaflet";
 import React from "react";
 import {
   AttributionControl,
@@ -5,7 +6,6 @@ import {
   TileLayer,
   ZoomControl,
 } from "react-leaflet";
-import L from "leaflet";
 import useBreakpoints from "../../hooks/useBreakpoints";
 
 type LeafletMapProps = {
@@ -23,7 +23,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({ mapRef, children }) => {
         center={[-6.471428154696355, 107.02629987019694]}
         // crs={L.CRS.EPSG4326}
         zoom={18}
-        className="w-full h-screen z-0 absolute"
+        className="absolute z-0 h-screen w-full"
         maxZoom={21}
         attributionControl={false}
       >

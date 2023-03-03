@@ -23,16 +23,16 @@ const SidebarMain: React.FC<SidebarMainProps> = ({
         profileDropdownOpen={profileDropdownOpened}
         setProfileDropdownOpen={setProfileDropDownOpened}
       />
-      <div className="text-3xl ml-10 mt-6 text-gray-200">Statistics</div>
-      <span className="mt-3 w-3/4 p-0.5 ml-5 bg-gray-200 "></span>
+      <div className="ml-10 mt-6 text-3xl text-gray-200">Statistics</div>
+      <span className="mt-3 ml-5 w-3/4 bg-gray-200 p-0.5 "></span>
       <StatsCard
         title="Total Pohon Kelapa Sawit"
         value={totalTrees}
         className="ml-6 mt-5"
       />
-      <span className="mt-10 w-3/4 p-0.5 ml-5 bg-gray-200 "></span>
+      <span className="mt-10 ml-5 w-3/4 bg-gray-200 p-0.5 "></span>
 
-      <div className="flex flex-col xl:flex-row justify-between">
+      <div className="flex flex-col justify-between xl:flex-row">
         <ButtonCard
           title="Lihat Semua Pohon Kelapa Sawit"
           className="ml-6 mt-5"
