@@ -67,6 +67,22 @@ const getTreesHistory = async (): Promise<Tree[]> => {
   return data;
 };
 
+const getPredictionByID = async (id: number): Promise<Prediction> => {
+  const url = `${API_URL}/api/v1/inference/predictions/${id}`;
+  const token = localStorage.getItem("access_token");
+
+  const response = await fetch(url, {
+    method: "GET",
+    headers: new Headers({
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    }),
+  });
+
+  const data: Prediction = await response.json();
+  return data;
+};
+
 const getPredictionsHistory = async (): Promise<Prediction[]> => {
   const url = `${API_URL}/api/v1/inference/predictions`;
   const token = localStorage.getItem("access_token");
@@ -80,6 +96,40 @@ const getPredictionsHistory = async (): Promise<Prediction[]> => {
   });
 
   const data: Prediction[] = await response.json();
+  return data;
+};
+
+const updateTreeByID = async (id: number, obj_in: any): Promise<Tree> => {
+  const url = `${API_URL}/api/v1/inference/trees/edit/${id}`;
+  const token = localStorage.getItem("access_token");
+  console.log(obj_in);
+
+  const response = await fetch(url, {
+    method: "PUT",
+    headers: new Headers({
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    }),
+    body: JSON.stringify(obj_in),
+  });
+
+  const data: Tree = await response.json();
+  return data;
+};
+
+const getPredictionsByID = async (id: number): Promise<Prediction> => {
+  const url = `${API_URL}/api/v1/inference/predictions/${id}`;
+  const token = localStorage.getItem("access_token");
+
+  const response = await fetch(url, {
+    method: "GET",
+    headers: new Headers({
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    }),
+  });
+
+  const data: Prediction = await response.json();
   return data;
 };
 
@@ -137,4 +187,7 @@ export {
   checkUser,
   getPredictionsHistory,
   getTotalTrees,
+  getPredictionsByID,
+  updateTreeByID,
+  getPredictionByID,
 };

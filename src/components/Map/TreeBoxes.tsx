@@ -10,6 +10,7 @@ type TreeBoxesProps = {
   rectRefs: React.MutableRefObject<Map<number, L.Rectangle> | null>;
   setDeleteTreeID: React.Dispatch<React.SetStateAction<number | null>>;
   setEditTreeID: React.Dispatch<React.SetStateAction<number | null>>;
+  color?: string;
 };
 
 const TreeBoxes: React.FC<TreeBoxesProps> = ({
@@ -17,6 +18,7 @@ const TreeBoxes: React.FC<TreeBoxesProps> = ({
   rectRefs,
   setEditTreeID,
   setDeleteTreeID,
+  color,
 }) => {
   const getRectMap = () => {
     if (!rectRefs.current) {
@@ -32,6 +34,7 @@ const TreeBoxes: React.FC<TreeBoxesProps> = ({
         return (
           <Rectangle
             key={`tree-${id}`}
+            color={`${color ? color : "blue"}`}
             ref={(props) => {
               const map = getRectMap();
               if (props) {
@@ -45,7 +48,7 @@ const TreeBoxes: React.FC<TreeBoxesProps> = ({
               tree.se_bounds as L.LatLngTuple,
             ]}
           >
-            <Popup>
+            <Popup className="w-96">
               <PopupCard
                 tree={tree}
                 setEditTreeID={setEditTreeID}

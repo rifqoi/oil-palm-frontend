@@ -9,7 +9,7 @@ type PredictedTreesProps = {
 };
 
 const PredictedTrees: React.FC<PredictedTreesProps> = ({}) => {
-  const { trees } = useContext(MapContext) as MapContextProps;
+  const { trees, rectRefs, mapRef } = useContext(MapContext) as MapContextProps;
   return (
     <>
       <StickyHeaderPrevious path="/" titleHeader="Previous" />
@@ -18,9 +18,15 @@ const PredictedTrees: React.FC<PredictedTreesProps> = ({}) => {
           trees.map((tree) => {
             return (
               <TreeCard
-                id={tree.id}
+                id={tree.tree_id}
                 latitude={tree.lat}
                 longitude={tree.long}
+                mapRef={mapRef}
+                rectRefs={rectRefs}
+                pemupukan_terakhir={tree.pemupukan_terakhir}
+                status={tree.status}
+                tanggal_penanaman={tree.planting_date}
+                tanggal_prediksi={tree.created_at}
               />
             );
           })

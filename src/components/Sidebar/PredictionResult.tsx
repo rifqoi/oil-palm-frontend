@@ -11,9 +11,8 @@ type PredictionResultProps = {
 };
 
 const PredictionResult: React.FC<PredictionResultProps> = () => {
-  const { trees, setTotalTrees, totalTrees, predictedTrees } = useContext(
-    MapContext
-  ) as MapContextProps;
+  const { trees, setTotalTrees, totalTrees, predictedTrees, rectRefs, mapRef } =
+    useContext(MapContext) as MapContextProps;
 
   // const predictedTrees = trees?.length;
   // console.log(trees);
@@ -45,6 +44,12 @@ const PredictionResult: React.FC<PredictionResultProps> = () => {
                   id={tree.tree_id}
                   latitude={tree.lat}
                   longitude={tree.long}
+                  mapRef={mapRef}
+                  rectRefs={rectRefs}
+                  pemupukan_terakhir={tree.pemupukan_terakhir}
+                  status={tree.status}
+                  tanggal_penanaman={tree.planting_date}
+                  tanggal_prediksi={tree.created_at}
                 />
               );
             })

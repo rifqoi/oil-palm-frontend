@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { AiOutlineArrowRight } from "react-icons/ai";
+import { useNavigate } from "react-router-dom";
 import { getPredictionsHistory } from "../../libs/api";
 import { Prediction } from "../../types/Tree";
 import StickyHeaderPrevious from "./StickyHeaderPrevious";
@@ -10,6 +11,8 @@ type HistoryPredictionsProps = {
 
 const HistoryPredictions: React.FC<HistoryPredictionsProps> = ({}) => {
   const [predictions, setPredictions] = useState<Prediction[]>();
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     getPredictionsHistory().then((preds) => {
@@ -25,7 +28,9 @@ const HistoryPredictions: React.FC<HistoryPredictionsProps> = ({}) => {
           predictions.map((pred) => {
             return (
               <div
-                // onClick={onClick}
+                onClick={() => {
+                  navigate(`/predictions/${pred.prediction_id}`);
+                }}
                 className={`mx-10 my-2 w-[80%] cursor-pointer rounded-r-xl border-t-2 border-r-2
       border-red-400 bg-slate-600 py-5 px-5 hover:bg-slate-800 `}
               >

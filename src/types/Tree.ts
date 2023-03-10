@@ -7,6 +7,9 @@ export type Tree = {
   nw_bounds: number[];
   se_bounds: number[];
   confidence: number;
+  status?: string
+  planting_date?: string
+  pemupukan_terakhir?: string
   created_at: string;
 };
 

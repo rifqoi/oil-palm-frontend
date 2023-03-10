@@ -13,11 +13,13 @@ import LeafletMap from "../components/Map/LeafletMap";
 import { AiOutlineArrowLeft, AiOutlineArrowRight } from "react-icons/ai";
 import { Outlet, useNavigate } from "react-router-dom";
 import FloatingButton from "../components/Map/FloatingButton";
+import PredictionBoxes from "../components/Map/PredictionBoxes";
 import TreeBoxes from "../components/Map/TreeBoxes";
 import useToken from "../hooks/useToken";
 import {
   checkUser,
   deleteTree,
+  getPredictionsByID,
   getPredictionsHistory,
   getTreesHistory,
   predictImage,
@@ -59,7 +61,10 @@ const MapPage = () => {
 
   const [totalTrees, setTotalTrees] = useState<number>();
   const rectRefs = useRef<Map<number, L.Rectangle> | null>(null);
-  const predictedRectRefs = useRef<Map<number, L.Rectangle> | null>(null);
+  const predictRectRefs = useRef<Map<number, L.Rectangle> | null>(null);
+  const treeInPredictBoxRectRefs = useRef<Map<number, L.Rectangle> | null>(
+    null
+  );
 
   // Rectangle untuk predict
   const [rectangleMouse, setRectangleMouse] = useState<LatLngBounds | null>(
@@ -88,10 +93,20 @@ const MapPage = () => {
   // Delete box tree
   const [deleteTreeID, setDeleteTreeID] = useState<number | null>(null);
 
+  const [deletePredictionTreeID, setDeletePredictionTreeID] = useState<
+    number | null
+  >(null);
+  const [treesInPredictedBox, setTreesInPredictedBox] = useState<Tree[] | null>(
+    null
+  );
+  const [predictionTreeID, setPredictionTreeID] = useState<number | null>(null);
+  const [cancelPopupID, setCancelPopupID] = useState<number | null>(null);
+
   // Media query
   // const { isXs } = useBreakpoints();
 
   const onSelectArea = (e: SyntheticEvent) => {
+    setTreesInPredictedBox(null);
     setShowTrees(false);
     setPredicted(true);
 
@@ -175,7 +190,11 @@ const MapPage = () => {
     }
   };
 
-  const onDeleteFunction = (id: number) => {
+  const onDeleteFunction = (
+    id: number,
+    treeBoxes: Tree[],
+    setTreeBoxes: React.Dispatch<React.SetStateAction<Tree[] | null>>
+  ) => {
     deleteTree(id).then((response) => {
       console.log(response);
       if (!response.ok) {
@@ -183,14 +202,14 @@ const MapPage = () => {
         return;
       }
 
-      const treeToDelete = trees?.findIndex(
+      const treeToDelete = treeBoxes.findIndex(
         (tree) => tree.tree_id === id
       ) as number;
       console.log(treeToDelete);
-      if (trees) {
-        const newTrees = [...trees];
+      if (treeBoxes) {
+        const newTrees = [...treeBoxes];
         newTrees.splice(treeToDelete, 1);
-        setTrees(newTrees);
+        setTreeBoxes(newTrees);
         rectRefs?.current?.delete(id);
         console.log(newTrees);
       }
@@ -301,11 +320,31 @@ const MapPage = () => {
 
   useEffect(() => {
     if (deleteTreeID) {
-      onDeleteFunction(deleteTreeID);
-      const myRect = rectRefs?.current?.get(deleteTreeID);
-      myRect?.closePopup();
+      if (trees) {
+        onDeleteFunction(deleteTreeID, trees, setTrees);
+        const myRect = rectRefs?.current?.get(deleteTreeID);
+        myRect?.closePopup();
+      }
     }
   }, [deleteTreeID]);
+
+  useEffect(() => {
+    if (deletePredictionTreeID) {
+      if (treesInPredictedBox) {
+        onDeleteFunction(
+          deletePredictionTreeID,
+          treesInPredictedBox,
+          setTreesInPredictedBox
+        );
+        const myRect = treeInPredictBoxRectRefs?.current?.get(
+          deletePredictionTreeID
+        );
+        console.log("deletePredictionTreeID", deletePredictionTreeID);
+        console.log("rect", myRect);
+        myRect?.closePopup();
+      }
+    }
+  }, [deletePredictionTreeID]);
 
   useEffect(() => {
     checkUser()
@@ -320,6 +359,33 @@ const MapPage = () => {
       .then((userRsp: User) => setUser(userRsp));
   }, []);
 
+  useEffect(() => {
+    if (predictionTreeID) {
+      console.log(predictionTreeID);
+
+      getPredictionsByID(predictionTreeID).then((data) => {
+        console.log(data);
+        if (treesInPredictedBox) {
+          setTreesInPredictedBox([...treesInPredictedBox, ...data.trees]);
+          return;
+        }
+        setTreesInPredictedBox(data.trees);
+      });
+
+      const rect = predictRectRefs.current?.get(predictionTreeID);
+      rect?.closePopup();
+      rect?.unbindPopup();
+    }
+  }, [predictionTreeID]);
+
+  useEffect(() => {
+    if (cancelPopupID) {
+      const rect = predictRectRefs.current?.get(cancelPopupID);
+      rect?.closePopup();
+      setCancelPopupID(null);
+    }
+  }, [cancelPopupID]);
+
   return (
     <>
       <MapContext.Provider
@@ -327,7 +393,10 @@ const MapPage = () => {
           totalTrees: totalTrees,
           trees: trees,
           setTotalTrees: setTotalTrees,
+          rectRefs,
+          mapRef,
           predictedTrees: predictedTrees,
+          setShowTrees: setShowTrees,
           user: user,
         }}
       >
@@ -400,22 +469,14 @@ const MapPage = () => {
             <div className="absolute top-0 left-0 bottom-0 right-0 z-10 cursor-wait bg-black opacity-50"></div>
           ) : null}
           <LeafletMap mapRef={mapRef}>
-            {predictions && predicted
-              ? predictions.map((pred) => {
-                  if (!pred.nw_bounds && !pred.se_bounds) return;
-                  return (
-                    <Rectangle
-                      color="green"
-                      bounds={
-                        [
-                          pred.nw_bounds,
-                          pred.se_bounds,
-                        ] as L.LatLngBoundsExpression
-                      }
-                    />
-                  );
-                })
-              : null}
+            {predictions && predicted ? (
+              <PredictionBoxes
+                predictions={predictions}
+                rectRefs={predictRectRefs}
+                setPredictionTreeID={setPredictionTreeID}
+                setCancelPopupID={setCancelPopupID}
+              />
+            ) : null}
             {predicted && prediction ? (
               <Rectangle
                 color="red"
@@ -427,6 +488,16 @@ const MapPage = () => {
                 }
               />
             ) : null}
+            {treesInPredictedBox ? (
+              <TreeBoxes
+                rectRefs={treeInPredictBoxRectRefs}
+                setDeleteTreeID={setDeletePredictionTreeID}
+                setEditTreeID={setEditTreeID}
+                trees={treesInPredictedBox}
+                color="yellow"
+              />
+            ) : null}
+
             {trees && showTrees ? (
               <TreeBoxes
                 rectRefs={rectRefs}
@@ -490,7 +561,10 @@ export type MapContextProps = {
   trees: Tree[] | null;
   user: User | undefined;
   predictedTrees: Tree[] | null;
+  rectRefs: React.MutableRefObject<Map<number, L.Rectangle<any>> | null>;
+  mapRef: React.RefObject<L.Map>;
   setTotalTrees: React.Dispatch<React.SetStateAction<number | undefined>>;
+  setShowTrees: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export const MapContext = React.createContext<MapContextProps | null>(null);
