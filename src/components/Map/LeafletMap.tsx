@@ -34,7 +34,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({ mapRef, children }) => {
 
         <TileLayer
           // url="https://mt0.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}"
-          url="https://www.google.cn/maps/vt?lyrs=s@189&gl=cn&x={x}&y={y}&z={z}"
+          url="https://www.google.com/maps/vt?lyrs=s@189&gl=cn&x={x}&y={y}&z={z}"
           // url="https://www.google.cn/maps/vt?lyrs=s@189&gl=cn&x={x}&y={y}&z={z}"
           // url="https://khms3.google.com/kh/v=941?x={x}&y={y}&z={z}"
           attribution="Imagery ©2023 CNES / Airbus, Maxar Technologies, Map data ©2023 "

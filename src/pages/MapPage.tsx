@@ -6,6 +6,7 @@ import L, {
   LatLngBounds,
   LatLngExpression,
   LayerEvent,
+  LeafletEvent,
   LeafletMouseEvent,
 } from "leaflet";
 import LeafletMap from "../components/Map/LeafletMap";
@@ -13,6 +14,7 @@ import LeafletMap from "../components/Map/LeafletMap";
 import { AiOutlineArrowLeft, AiOutlineArrowRight } from "react-icons/ai";
 import { Outlet, useNavigate } from "react-router-dom";
 import FloatingButton from "../components/Map/FloatingButton";
+import PopupConfirmation from "../components/Map/PopupConfirmation";
 import PredictionBoxes from "../components/Map/PredictionBoxes";
 import TreeBoxes from "../components/Map/TreeBoxes";
 import useToken from "../hooks/useToken";
@@ -132,40 +134,128 @@ const MapPage = () => {
     console.log(layer.getCenter());
   };
 
-  const drawSomething = (e: SyntheticEvent) => {
+  const drawPolygon = (e: SyntheticEvent) => {
     e.preventDefault();
     if (mapRef.current) {
       const map = mapRef.current as L.DrawMap;
 
-      const rect = new L.Draw.Rectangle(map, {
-        // @ts-ignore
-        showArea: false,
+      const polygon = new L.Draw.Polygon(map, {
+        allowIntersection: false,
+        shapeOptions: {
+          color: "#97009c",
+        },
+      });
+
+      const drawControl = new L.Control.Draw({
+        edit: {
+          featureGroup: fgRef.current!,
+        },
+        draw: {
+          circle: false,
+          circlemarker: false,
+          marker: false,
+          polygon: false,
+          polyline: false,
+          rectangle: false,
+        },
+        position: "topright",
+      });
+
+      const removeLayers = (featureGroup: L.FeatureGroup) => {
+        const drawnItems = featureGroup.getLayers();
+        drawnItems.forEach((layer, index) => {
+          if (index > 0) return;
+          layer.closePopup();
+          featureGroup.removeLayer(layer);
+        });
+
+        drawControl.remove();
+      };
+
+      map.on(L.Draw.Event.DRAWSTART, (e: LayerEvent) => {
+        if (fgRef.current) {
+          const layersLength = fgRef.current.getLayers().length;
+          if (layersLength == 1) {
+            removeLayers(fgRef.current);
+          }
+        }
+      });
+
+      map.on(L.Draw.Event.EDITSTART, (e: LeafletEvent) => {
+        if (fgRef.current) {
+          const layers = fgRef.current.getLayers();
+          layers.forEach((layer) => {
+            layer.closePopup();
+          });
+        }
+      });
+
+      map.on(L.Draw.Event.EDITSTOP, (e: LeafletEvent) => {
+        if (fgRef.current) {
+          const layers = fgRef.current.getLayers();
+          layers.forEach((layer) => {
+            layer.openPopup();
+          });
+        }
       });
 
       map.on(L.Draw.Event.CREATED, (e: LayerEvent) => {
         if (fgRef.current) {
-          const drawnItems = fgRef.current.getLayers();
-          if (drawnItems.length > 1) {
-            drawnItems.forEach((layer, index) => {
-              if (index > 0) return;
-              fgRef.current?.removeLayer(layer);
-            });
-          }
+          removeLayers(fgRef.current);
+          const layer = e.layer as L.Polygon;
 
-          const type = e.type;
-          const layer = e.layer as L.Rectangle;
+          const popup = new L.Popup({
+            autoClose: false,
+            closeButton: false,
+          });
 
-          layer.on("click", () => console.log(layer.getCenter()));
+          popup.setContent(
+            PopupConfirmation({
+              onConfirmed: () => {
+                console.log("Yes");
+                const currentArea = localStorage.getItem("area");
+                if (currentArea) {
+                  const newArea: string[] = JSON.parse(currentArea);
+                  newArea.push(JSON.stringify(layer.toGeoJSON()));
+                  localStorage.setItem("area", JSON.stringify(newArea));
+                } else {
+                  const newArea = [];
+                  newArea.push(JSON.stringify(layer.toGeoJSON()));
+                  localStorage.setItem("area", JSON.stringify(newArea));
+                }
 
+                console.log(localStorage.getItem("area"));
+
+                layer.closePopup();
+                mapRef.current!.removeControl(drawControl);
+                removeLayers(fgRef.current!);
+              },
+              onCancelled: () => {
+                console.log("No");
+                layer.closePopup();
+                drawControl.remove();
+                mapRef.current!.removeControl(drawControl);
+                removeLayers(fgRef.current!);
+              },
+            })
+          );
+
+          layer.bindPopup(popup);
+
+          mapRef.current!.addControl(drawControl);
           fgRef.current.addLayer(layer);
+          layer.openPopup();
 
-          const center = layer.getCenter();
+          console.log(drawControl);
 
-          setRectAddCenter(center);
+          // const center = layer.getCenter();
+
+          // setRectAddCenter(center);
         }
       });
 
-      rect.enable();
+      // rect.enable();
+      polygon.enable();
     }
   };
 
@@ -424,7 +514,7 @@ const MapPage = () => {
           </div>
 
           <div className="fixed bottom-0 right-0 z-20 float-right mr-5 mb-12 flex flex-col sm:mb-14 md:mb-10">
-            <FloatingButton onClick={drawSomething} text="Add Tree" />
+            <FloatingButton onClick={drawPolygon} text="Add Area" />
             <FloatingButton text="Predict Image" onClick={onSelectArea} />
             <FloatingButton
               className={`${
