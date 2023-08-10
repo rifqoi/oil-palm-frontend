@@ -35,21 +35,6 @@ const PredictedTrees: React.FC<PredictedTreesProps> = ({}) => {
             There are no predicted trees...
           </h1>
         )}
-        {/* <TreeCard
-          id="1"
-          latitude="-6.472635010415303"
-          longitude="103.5102599193628"
-        />
-        <TreeCard
-          id="2"
-          latitude="-6.472635010415303"
-          longitude="103.5102599193628"
-        />
-        <TreeCard
-          id="3"
-          latitude="-6.472635010415303"
-          longitude="103.5102599193628"
-        /> */}
       </div>
     </>
   );

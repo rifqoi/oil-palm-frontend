@@ -14,7 +14,8 @@ const StickyHeaderPrevious: React.FC<StickyHeaderPreviousProps> = ({
   const navigate = useNavigate();
   return (
     <div
-      className="group sticky top-0 z-30 h-screen w-full bg-gray-700 text-2xl"
+      // className="group sticky top-0 z-30 h-screen w-full bg-gray-700 text-2xl"
+      className="group sticky top-0 z-30 w-full bg-gray-700 text-2xl"
       onClick={() => {
         navigate(path);
       }}

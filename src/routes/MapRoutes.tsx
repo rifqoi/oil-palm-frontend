@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Route, Routes } from "react-router-dom";
 import Logout from "../components/Auth/Logout";
 import RequireAuth from "../components/Auth/RequireAuth";
+import Areas from "../components/Sidebar/Areas";
 import HistoryPredictions from "../components/Sidebar/HistoryPredictions";
 import HistoryPredictionsID from "../components/Sidebar/HistoryPredictionsID";
 import PredictedTrees from "../components/Sidebar/PredictedTrees";
@@ -30,6 +31,15 @@ const MapRoutes = () => {
                   profileDropdownOpened={profileDropdownOpen}
                   setProfileDropDownOpened={setProfileDropdownOpen}
                 />
+              </>
+            }
+          />
+          <Route
+            path="/areas"
+            element={
+              <>
+                <Areas />
+                {/* <div className="grid grid-cols-1 xl:grid-cols-2 w-full h-auto"></div> */}
               </>
             }
           />

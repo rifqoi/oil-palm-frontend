@@ -44,6 +44,9 @@ const SidebarMain: React.FC<SidebarMainProps> = ({
           path="/predictions"
         />
       </div>
+      <div className="">
+        <ButtonCard title="Show Areas" className="ml-6 mt-5" path="/areas" />
+      </div>
     </>
   );
 };

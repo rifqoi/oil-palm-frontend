@@ -10,6 +10,7 @@ import L, {
   LeafletMouseEvent,
 } from "leaflet";
 import LeafletMap from "../components/Map/LeafletMap";
+// import "../leaflet.snogylop";
 
 import { AiOutlineArrowLeft, AiOutlineArrowRight } from "react-icons/ai";
 import { Outlet, useNavigate } from "react-router-dom";
@@ -26,6 +27,8 @@ import {
   getTreesHistory,
   predictImage,
 } from "../libs/api";
+import { Area } from "../types/Area";
+import { GeoJSONFeature } from "../types/GeoJSONFeature";
 import { Prediction, Tree } from "../types/Tree";
 import { User } from "../types/User";
 
@@ -214,18 +217,32 @@ const MapPage = () => {
               onConfirmed: () => {
                 console.log("Yes");
                 const currentArea = localStorage.getItem("area");
+                const area: Area = {
+                  id: 0,
+                  // id: newArea.length,
+                  totalTrees: 1000,
+                  center: layer.getCenter(),
+                  geoJSON: layer.toGeoJSON() as GeoJSONFeature,
+                };
                 if (currentArea) {
-                  const newArea: string[] = JSON.parse(currentArea);
-                  newArea.push(JSON.stringify(layer.toGeoJSON()));
+                  const newArea: Area[] = JSON.parse(currentArea);
+                  area.id = newArea.length;
+                  // newArea.push(JSON.stringify(layer.toGeoJSON()));
+                  newArea.push(area);
                   localStorage.setItem("area", JSON.stringify(newArea));
                 } else {
-                  const newArea = [];
-                  newArea.push(JSON.stringify(layer.toGeoJSON()));
+                  const newArea: Area[] = [];
+                  area.id = 1;
+                  newArea.push(area);
+                  // newArea.push(JSON.stringify(layer.toGeoJSON()));
                   localStorage.setItem("area", JSON.stringify(newArea));
                 }
 
                 console.log(localStorage.getItem("area"));
 
+                const geoJSON = new L.GeoJSON(layer.toGeoJSON());
+                console.log(geoJSON);
+                map.addLayer(geoJSON);
                 layer.closePopup();
                 mapRef.current!.removeControl(drawControl);
                 removeLayers(fgRef.current!);
@@ -245,17 +262,54 @@ const MapPage = () => {
           mapRef.current!.addControl(drawControl);
           fgRef.current.addLayer(layer);
           layer.openPopup();
-
-          console.log(drawControl);
-
-          // const center = layer.getCenter();
-
-          // setRectAddCenter(center);
         }
       });
 
       // rect.enable();
       polygon.enable();
+    }
+  };
+
+  const [showAreas, setShowAreas] = useState<boolean>(true);
+  const [areaFeatureGroup, setAreaFeatureGroup] = useState<L.FeatureGroup>();
+  const showAllAreas = (e: SyntheticEvent) => {
+    e.preventDefault();
+
+    const areasJSON = localStorage.getItem("area");
+    setShowAreas(!showAreas);
+
+    if (!areasJSON) {
+      return;
+    }
+
+    if (showAreas) {
+      const areaFG = new L.FeatureGroup();
+      setAreaFeatureGroup(areaFG);
+      mapRef.current?.addLayer(areaFG);
+
+      const areas: Area[] = JSON.parse(areasJSON);
+      areas.forEach((area) => {
+        const areaJSON: GeoJSONFeature = area.geoJSON;
+        const geojson = new L.GeoJSON(areaJSON, {
+          style: {
+            fillOpacity: 0.05,
+          },
+        });
+        areaFG.addLayer(geojson);
+      });
+
+      // const areas: string[] = JSON.parse(areasJSON);
+      // areas.forEach((area) => {
+      //   const areaJSON: GeoJSON.Feature = JSON.parse(area);
+      //   const geojson = new L.GeoJSON(areaJSON, {
+      //     style: {
+      //       fillOpacity: 0.05,
+      //     },
+      //   });
+      //   areaFG.addLayer(geojson);
+      // });
+    } else {
+      mapRef.current?.removeLayer(areaFeatureGroup!);
     }
   };
 
@@ -449,6 +503,26 @@ const MapPage = () => {
       .then((userRsp: User) => setUser(userRsp));
   }, []);
 
+  const [areas, setAreas] = useState<Area[]>();
+  useEffect(() => {
+    const areaJSON = localStorage.getItem("area");
+    if (!areaJSON) {
+      return;
+    }
+
+    // const areas: string[] = JSON.parse(areaJSON);
+    // const finalAreas: Area[] = [];
+    //   console.log(areas)
+    // areas.map((area) => {
+    //   finalAreas.push(JSON.parse(area));
+    // });
+
+    const areas: Area[] = JSON.parse(areaJSON);
+
+    console.log(areas);
+    setAreas(areas);
+  }, []);
+
   useEffect(() => {
     if (predictionTreeID) {
       console.log(predictionTreeID);
@@ -488,6 +562,7 @@ const MapPage = () => {
           predictedTrees: predictedTrees,
           setShowTrees: setShowTrees,
           user: user,
+          areas: areas,
         }}
       >
         <div className="flex">
@@ -515,6 +590,7 @@ const MapPage = () => {
 
           <div className="fixed bottom-0 right-0 z-20 float-right mr-5 mb-12 flex flex-col sm:mb-14 md:mb-10">
             <FloatingButton onClick={drawPolygon} text="Add Area" />
+            <FloatingButton onClick={showAllAreas} text="Show Areas" />
             <FloatingButton text="Predict Image" onClick={onSelectArea} />
             <FloatingButton
               className={`${
@@ -655,6 +731,7 @@ export type MapContextProps = {
   mapRef: React.RefObject<L.Map>;
   setTotalTrees: React.Dispatch<React.SetStateAction<number | undefined>>;
   setShowTrees: React.Dispatch<React.SetStateAction<boolean>>;
+  areas: Area[] | undefined;
 };
 
 export const MapContext = React.createContext<MapContextProps | null>(null);
