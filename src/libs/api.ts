@@ -1,5 +1,7 @@
 // import useToken from "../hooks/useToken"
 import { LatLng } from "leaflet";
+import { Area } from "../types/Area";
+import { GeoJSONFeature } from "../types/GeoJSONFeature";
 import { Prediction, TotalTrees, Tree } from "../types/Tree";
 import { API_URL } from "./config";
 
@@ -179,6 +181,70 @@ async function checkUser() {
   return response;
 }
 
+async function insertArea(
+  center_lat: number,
+  center_long: number,
+  geojson: string
+) {
+  const url = `${API_URL}/api/v1/areas`;
+  const token = localStorage.getItem("access_token");
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: new Headers({
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    }),
+    body: JSON.stringify({
+      center_lat,
+      center_long,
+      geojson,
+    }),
+  });
+
+  return response;
+}
+
+export type AreaResponse = {
+  id: number;
+  user_id: number;
+  center_lat: number;
+  center_long: number;
+  geojson: GeoJSONFeature;
+  total_trees: number;
+  created_at: Date;
+};
+
+async function getAllAreas() {
+  const url = `${API_URL}/api/v1/areas`;
+  const token = localStorage.getItem("access_token");
+
+  const response = await fetch(url, {
+    method: "GET",
+    headers: new Headers({
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    }),
+  });
+
+  const jsonRes: AreaResponse[] = await response.json();
+
+  const areas: Area[] = [];
+  jsonRes.map((v) => {
+    const area: Area = {
+      id: v.id,
+      center: new LatLng(v.center_lat, v.center_long),
+      geojson: v.geojson,
+      totalTrees: v.total_trees,
+      createdAt: v.created_at,
+    };
+
+    areas.push(area);
+  });
+
+  return areas;
+}
+
 export {
   getImage,
   predictImage,
@@ -190,4 +256,6 @@ export {
   getPredictionsByID,
   updateTreeByID,
   getPredictionByID,
+  insertArea,
+  getAllAreas,
 };

@@ -22,9 +22,11 @@ import useToken from "../hooks/useToken";
 import {
   checkUser,
   deleteTree,
+  getAllAreas,
   getPredictionsByID,
   getPredictionsHistory,
   getTreesHistory,
+  insertArea,
   predictImage,
 } from "../libs/api";
 import { Area } from "../types/Area";
@@ -216,34 +218,46 @@ const MapPage = () => {
             PopupConfirmation({
               onConfirmed: () => {
                 console.log("Yes");
-                const currentArea = localStorage.getItem("area");
-                const area: Area = {
-                  id: 0,
-                  // id: newArea.length,
-                  totalTrees: 1000,
-                  center: layer.getCenter(),
-                  geoJSON: layer.toGeoJSON() as GeoJSONFeature,
-                };
-                if (currentArea) {
-                  const newArea: Area[] = JSON.parse(currentArea);
-                  area.id = newArea.length;
-                  // newArea.push(JSON.stringify(layer.toGeoJSON()));
-                  newArea.push(area);
-                  localStorage.setItem("area", JSON.stringify(newArea));
-                } else {
-                  const newArea: Area[] = [];
-                  area.id = 1;
-                  newArea.push(area);
-                  // newArea.push(JSON.stringify(layer.toGeoJSON()));
-                  localStorage.setItem("area", JSON.stringify(newArea));
-                }
+                // const currentArea = localStorage.getItem("area");
+                // const area: Area = {
+                //   id: 0,
+                //   // id: newArea.length,
+                //   totalTrees: 1000,
+                //   center: layer.getCenter(),
+                //   geojson: layer.toGeoJSON() as GeoJSONFeature,
+                // };
+                // if (currentArea) {
+                //   const newArea: Area[] = JSON.parse(currentArea);
+                //   area.id = newArea.length;
+                //   // newArea.push(JSON.stringify(layer.toGeoJSON()));
+                //   newArea.push(area);
+                //   localStorage.setItem("area", JSON.stringify(newArea));
+                // } else {
+                //   const newArea: Area[] = [];
+                //   area.id = 1;
+                //   newArea.push(area);
+                //   // newArea.push(JSON.stringify(layer.toGeoJSON()));
+                //   localStorage.setItem("area", JSON.stringify(newArea));
+                // }
 
-                console.log(localStorage.getItem("area"));
-
-                const geoJSON = new L.GeoJSON(layer.toGeoJSON());
-                console.log(geoJSON);
+                const geoJSON = new L.GeoJSON(layer.toGeoJSON(), {
+                  style: {
+                    color: "white",
+                    fillColor: "white",
+                    fillOpacity: 0.2,
+                  },
+                });
                 map.addLayer(geoJSON);
                 layer.closePopup();
+                const center = layer.getCenter();
+                insertArea(
+                  center.lat,
+                  center.lng,
+                  JSON.stringify(layer.toGeoJSON())
+                ).then((value) => {
+                  console.log(value);
+                });
+
                 mapRef.current!.removeControl(drawControl);
                 removeLayers(fgRef.current!);
               },
@@ -275,10 +289,9 @@ const MapPage = () => {
   const showAllAreas = (e: SyntheticEvent) => {
     e.preventDefault();
 
-    const areasJSON = localStorage.getItem("area");
     setShowAreas(!showAreas);
 
-    if (!areasJSON) {
+    if (!areas) {
       return;
     }
 
@@ -287,12 +300,13 @@ const MapPage = () => {
       setAreaFeatureGroup(areaFG);
       mapRef.current?.addLayer(areaFG);
 
-      const areas: Area[] = JSON.parse(areasJSON);
       areas.forEach((area) => {
-        const areaJSON: GeoJSONFeature = area.geoJSON;
+        const areaJSON: GeoJSONFeature = area.geojson;
         const geojson = new L.GeoJSON(areaJSON, {
           style: {
-            fillOpacity: 0.05,
+            fillOpacity: 0.1,
+            color: "red",
+            fillColor: "white",
           },
         });
         areaFG.addLayer(geojson);
@@ -505,10 +519,7 @@ const MapPage = () => {
 
   const [areas, setAreas] = useState<Area[]>();
   useEffect(() => {
-    const areaJSON = localStorage.getItem("area");
-    if (!areaJSON) {
-      return;
-    }
+    getAllAreas().then((value) => setAreas(value));
 
     // const areas: string[] = JSON.parse(areaJSON);
     // const finalAreas: Area[] = [];
@@ -516,11 +527,6 @@ const MapPage = () => {
     // areas.map((area) => {
     //   finalAreas.push(JSON.parse(area));
     // });
-
-    const areas: Area[] = JSON.parse(areaJSON);
-
-    console.log(areas);
-    setAreas(areas);
   }, []);
 
   useEffect(() => {

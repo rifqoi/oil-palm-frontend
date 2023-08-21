@@ -1,9 +1,11 @@
-import { LatLngTuple } from "leaflet";
+import { LatLng } from "leaflet";
 import { GeoJSONFeature } from "./GeoJSONFeature";
 
 export type Area = {
   id: number;
-  geoJSON: GeoJSONFeature;
+  geojson: GeoJSONFeature;
   totalTrees: number;
-  center: LatLngTuple;
+  center: LatLng;
+
+  createdAt: Date | undefined;
 };
